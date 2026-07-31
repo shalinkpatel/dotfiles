@@ -1,0 +1,4 @@
+theme = "serika-dark"
+
+[editor]
+line-number = "relative"

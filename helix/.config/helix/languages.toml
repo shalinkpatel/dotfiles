@@ -1,0 +1,11 @@
+[[language]]
+name = "numbat"
+scope = "source.numbat"
+injection-regex = "numbat"
+file-types = ["nbt"]
+comment-tokens = "#"
+indent = { tab-width = 2, unit = "  " }
+
+[[grammar]]
+name = "numbat"
+source = { git = "https://github.com/irevoire/tree-sitter-numbat", rev = "4d9ce55767f7cc2a0ef97dd070de7e4519920607" }

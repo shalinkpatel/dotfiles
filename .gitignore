@@ -1,0 +1,10 @@
+# Never commit real secrets — only the .example template.
+.profile.secret
+shell/.profile.secret
+**/.profile.secret
+
+# Backup files produced by install.sh's link_path
+*.bak.*
+
+# OS cruft
+.DS_Store
