@@ -271,10 +271,11 @@ install_uv_tools() {
 # --- main -----------------------------------------------------------------
 
 main() {
-  # Shell
+  # Shell — zsh is primary; .bashrc covers pods/containers that land in bash.
   link_path "$DOTFILES_DIR/shell/.zshrc" "$HOME/.zshrc"
   link_path "$DOTFILES_DIR/shell/.zshenv" "$HOME/.zshenv"
   link_path "$DOTFILES_DIR/shell/.zprofile" "$HOME/.zprofile"
+  link_path "$DOTFILES_DIR/shell/.bashrc" "$HOME/.bashrc"
   link_path "$DOTFILES_DIR/shell/.profile" "$HOME/.profile"
 
   # Prompt + editors
