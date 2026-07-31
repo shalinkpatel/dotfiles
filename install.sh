@@ -57,6 +57,15 @@ asset_arch() {
   esac
 }
 
+# Some projects (fzf, most Go/via-GoReleaser tools) use amd64/arm64 instead.
+go_asset_arch() {
+  case "$ARCH" in
+    x86_64 | amd64) echo "amd64" ;;
+    aarch64 | arm64) echo "arm64" ;;
+    *) echo "$ARCH" ;;
+  esac
+}
+
 # --- toolchain ------------------------------------------------------------
 
 install_rust() {
@@ -211,6 +220,35 @@ install_claude() {
   fetch https://claude.ai/install.sh | bash
 }
 
+install_fzf() {
+  # The apt build of fzf is too old for --zsh/--bash and for zp's
+  # --with-shell, so install a modern release binary on Linux. It lands in
+  # ~/.local/bin, which .profile puts ahead of /usr/bin, so it shadows any
+  # older system fzf. On macOS fzf comes from Homebrew.
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping fzf binary install on $OS (use Homebrew)"
+    return 0
+  fi
+  local want="0.74.1"
+  if command -v fzf >/dev/null 2>&1; then
+    local cur
+    cur="$(fzf --version 2>/dev/null | awk '{print $1}')"
+    if [ "$cur" = "$want" ] && [ "$(command -v fzf)" = "$HOME/.local/bin/fzf" ]; then
+      info "fzf $cur already installed in ~/.local/bin"
+      return 0
+    fi
+    info "Replacing system fzf ${cur:-unknown} with $want in ~/.local/bin"
+  fi
+  info "Installing fzf $want to ~/.local/bin"
+  mkdir -p "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/junegunn/fzf/releases/download/v${want}/fzf-${want}-linux_$(go_asset_arch).tar.gz" "$tmp/fzf.tar.gz"
+  tar -xzf "$tmp/fzf.tar.gz" -C "$tmp" fzf
+  install -m 0755 "$tmp/fzf" "$HOME/.local/bin/fzf"
+  rm -rf "$tmp"
+}
+
 install_uv() {
   if command -v uv >/dev/null 2>&1; then
     info "uv already installed"
@@ -310,6 +348,7 @@ main() {
     info "SKIP_CARGO=1: skipping cargo builds"
   fi
 
+  install_fzf || info "WARN: fzf install failed"
   install_zmx || info "WARN: zmx install failed"
   install_zmx_picker || info "WARN: zmx-picker install failed"
   install_helix || info "WARN: helix install failed"

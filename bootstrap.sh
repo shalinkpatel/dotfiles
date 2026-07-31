@@ -14,10 +14,11 @@ if [ "$(uname -s)" = "Linux" ] && command -v apt-get >/dev/null 2>&1; then
   export DEBIAN_FRONTEND=noninteractive
   $SUDO apt-get update -qq || true
   # pkg-config + libssl-dev + build-essential give cargo a linker and the
-  # native deps some crates need. ripgrep/fd are compiled from source in
-  # install.sh instead of apt, so they get the same optimizations.
+  # native deps some crates need. fzf is deliberately NOT here — the apt
+  # build is too old for --zsh/--bash/--with-shell; install.sh puts a modern
+  # fzf in ~/.local/bin (which precedes /usr/bin on PATH).
   $SUDO apt-get install -y -qq \
-    git curl wget unzip zsh fzf jq htop \
+    git curl wget unzip zsh jq htop \
     build-essential pkg-config libssl-dev ca-certificates \
     >/dev/null || echo "WARN: base package install incomplete"
 

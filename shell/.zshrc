@@ -21,6 +21,6 @@ fi
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
-if command -v fastfetch >/dev/null 2>&1 && [ -o interactive ]; then
+if command -v fastfetch >/dev/null 2>&1 && [[ -o interactive ]]; then
   fastfetch
 fi
