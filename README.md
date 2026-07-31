@@ -35,6 +35,7 @@ zed/           zed settings (macOS only)
 |---|---|
 | eza, zoxide, starship, ripgrep, fd, just, jj, numbat | compiled via cargo (full opts) |
 | zmx | GitHub release binary |
+| zmx-picker (`zp`) | GitHub source tarball (shell script; needs fzf + zmx) |
 | helix | GitHub release binary + runtime |
 | fastfetch | GitHub `.deb` |
 | uv, ruff, ty | uv installer + `uv tool` |

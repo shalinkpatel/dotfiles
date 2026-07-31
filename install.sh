@@ -133,6 +133,43 @@ install_zmx() {
   rm -rf "$tmp"
 }
 
+install_zmx_picker() {
+  # zp is a plain shell script (fuzzy picker for zmx sessions/repos); the
+  # formula just installs it from the source tarball. Depends on fzf + zmx
+  # (already installed); fd speeds up repo scans. On macOS this is
+  # `brew install EarthmanMuons/tap/zmx-picker`.
+  if command -v zp >/dev/null 2>&1; then
+    info "zmx-picker (zp) already installed"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping zmx-picker install on $OS (use 'brew install EarthmanMuons/tap/zmx-picker')"
+    return 0
+  fi
+  local version
+  version="$(fetch https://api.github.com/repos/EarthmanMuons/zmx-picker/releases/latest | grep '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/')"
+  if [ -z "$version" ]; then
+    info "Could not resolve latest zmx-picker version"
+    return 1
+  fi
+  info "Installing zmx-picker $version (zp) to ~/.local/bin"
+  mkdir -p "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/EarthmanMuons/zmx-picker/archive/refs/tags/v${version}.tar.gz" "$tmp/zp.tar.gz"
+  tar -xzf "$tmp/zp.tar.gz" -C "$tmp"
+  local binpath
+  binpath="$(find "$tmp" -name zp -type f | head -1)"
+  if [ -n "$binpath" ]; then
+    install -m 0755 "$binpath" "$HOME/.local/bin/zp"
+  else
+    info "WARN: zp script not found in tarball"
+    rm -rf "$tmp"
+    return 1
+  fi
+  rm -rf "$tmp"
+}
+
 install_helix() {
   if command -v hx >/dev/null 2>&1; then
     info "helix already installed: $(hx --version 2>/dev/null | head -1)"
@@ -262,6 +299,7 @@ main() {
   fi
 
   install_zmx || info "WARN: zmx install failed"
+  install_zmx_picker || info "WARN: zmx-picker install failed"
   install_helix || info "WARN: helix install failed"
   install_fastfetch || info "WARN: fastfetch install failed"
   install_uv_tools || info "WARN: uv tools install failed"
