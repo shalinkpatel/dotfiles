@@ -39,6 +39,7 @@ zed/           zed settings (macOS only)
 | helix | GitHub release binary + runtime |
 | fastfetch | GitHub `.deb` |
 | uv, ruff, ty | uv installer + `uv tool` |
+| claude | official installer (claude.ai/install.sh) |
 | fzf, jq, htop, zsh, git | apt (base) |
 
 On macOS the same config files are symlinked, but tool installs are left to

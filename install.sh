@@ -200,6 +200,17 @@ install_helix() {
   rm -rf "$tmp"
 }
 
+install_claude() {
+  # Native installer; works on macOS and Linux, lands in ~/.local/bin (already
+  # on PATH via .profile). Idempotent — skips when claude is already present.
+  if command -v claude >/dev/null 2>&1; then
+    info "Claude Code already installed: $(claude --version 2>/dev/null || true)"
+    return 0
+  fi
+  info "Installing Claude Code"
+  fetch https://claude.ai/install.sh | bash
+}
+
 install_uv() {
   if command -v uv >/dev/null 2>&1; then
     info "uv already installed"
@@ -303,6 +314,7 @@ main() {
   install_helix || info "WARN: helix install failed"
   install_fastfetch || info "WARN: fastfetch install failed"
   install_uv_tools || info "WARN: uv tools install failed"
+  install_claude || info "WARN: claude install failed"
 
   info ""
   info "Install complete."
