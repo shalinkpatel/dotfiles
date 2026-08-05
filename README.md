@@ -50,7 +50,7 @@ exports the same default so shells and agents see it.
 | fastfetch | GitHub `.deb` |
 | uv, ruff, ty | uv installer + `uv tool` |
 | claude | official installer (claude.ai/install.sh) |
-| pi | config symlinked by install.sh; binary via npm (`npm i -g @earendil-works/pi-coding-agent`) |
+| pi | npm install via install.sh (`install_pi`); config symlinked |
 | fzf, jq, htop, zsh, git | apt (base) |
 
 On macOS the same config files are symlinked, but tool installs are left to
@@ -58,8 +58,9 @@ Homebrew (cargo builds and Linux binaries are skipped by an OS check).
 
 ## Pi (coding agent)
 
-`pi/` mirrors the pi config layout and is symlinked into `$HOME` by
-`install.sh`:
+`install.sh` installs the pi binary via npm (`install_pi`; needs node/npm,
+installed via apt on Linux pods when missing) and symlinks its config into
+`$HOME`:
 
 - `pi/.pi/agent/settings.json` — theme, default provider/model, enabled
   models, thinking level.
