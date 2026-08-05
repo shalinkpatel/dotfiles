@@ -1,0 +1,84 @@
+{
+  "mcpServers": {
+    "baseten-docs": {
+      "url": "https://docs.baseten.co/mcp"
+    },
+    "b10-mcp": {
+      "url": "https://baseten.runlayer.com/api/v1/proxy/3a93ef17-f7c5-4262-b554-6d8bdecca086/mcp",
+      "auth": "oauth"
+    },
+    "gmail": {
+      "url": "https://gmailmcp.googleapis.com/mcp/v1",
+      "auth": "oauth",
+      "oauth": {
+        "clientId": "${GOOGLE_MCP_OAUTH_CLIENT_ID}",
+        "clientSecret": "!printenv GOOGLE_MCP_OAUTH_CLIENT_SECRET",
+        "redirectUri": "http://localhost:19876/callback",
+        "scope": "https://www.googleapis.com/auth/gmail.modify",
+        "authorizationParams": {
+          "access_type": "offline",
+          "prompt": "consent"
+        }
+      }
+    },
+    "google-calendar": {
+      "url": "https://calendarmcp.googleapis.com/mcp/v1",
+      "auth": "oauth",
+      "oauth": {
+        "clientId": "${GOOGLE_MCP_OAUTH_CLIENT_ID}",
+        "clientSecret": "!printenv GOOGLE_MCP_OAUTH_CLIENT_SECRET",
+        "redirectUri": "http://localhost:19876/callback",
+        "scope": "https://www.googleapis.com/auth/calendar",
+        "authorizationParams": {
+          "access_type": "offline",
+          "prompt": "consent"
+        }
+      }
+    },
+    "google-drive": {
+      "url": "https://drivemcp.googleapis.com/mcp/v1",
+      "auth": "oauth",
+      "oauth": {
+        "clientId": "${GOOGLE_MCP_OAUTH_CLIENT_ID}",
+        "clientSecret": "!printenv GOOGLE_MCP_OAUTH_CLIENT_SECRET",
+        "redirectUri": "http://localhost:19876/callback",
+        "scope": "https://www.googleapis.com/auth/drive",
+        "authorizationParams": {
+          "access_type": "offline",
+          "prompt": "consent"
+        }
+      }
+    },
+    "linear": {
+      "url": "https://mcp.linear.app/mcp",
+      "auth": "oauth"
+    },
+    "excalidraw": {
+      "url": "https://excalidraw-mcp-app.vercel.app/mcp",
+      "auth": "oauth"
+    },
+    "slack": {
+      "url": "https://mcp.slack.com/mcp",
+      "auth": "oauth",
+      "oauth": {
+        "clientId": "${SLACK_MCP_OAUTH_CLIENT_ID}",
+        "clientSecret": "!printenv SLACK_MCP_OAUTH_CLIENT_SECRET",
+        "redirectUri": "http://localhost:19876/callback",
+        "scope": "search:read.public search:read.private search:read.mpim search:read.im search:read.files search:read.users chat:write channels:history groups:history mpim:history im:history canvases:read canvases:write users:read users:read.email reactions:write reactions:read emoji:read files:read channels:write groups:write im:write mpim:write channels:read groups:read mpim:read lists:read lists:write files:write im:read"
+      }
+    },
+    "notion": {
+      "url": "https://mcp.notion.com/mcp",
+      "auth": "oauth"
+    },
+    "granola": {
+      "url": "https://mcp.granola.ai/mcp",
+      "auth": "oauth"
+    }
+  },
+  "imports": [
+    "claude-code",
+    "claude-desktop",
+    "codex"
+  ]
+}
