@@ -2,6 +2,9 @@
 .profile.secret
 shell/.profile.secret
 **/.profile.secret
+pi/.pi/agent/auth.json
+pi/.pi/agent/models-store.json
+pi/.pi/agent/sessions/
 
 # Backup files produced by install.sh's link_path
 *.bak.*

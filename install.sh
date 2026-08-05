@@ -11,6 +11,10 @@ BACKUP_SUFFIX="bak.$(date +%Y%m%d%H%M%S)"
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
+# Root of the dev layout (repos/ + workspaces/). Same default as ~/.profile;
+# override per machine via the environment (e.g. WORKSPACE_ROOT=/workspace).
+export WORKSPACE_ROOT="${WORKSPACE_ROOT:-$HOME/dev}"
+
 info() { printf '%s\n' "$*"; }
 
 link_path() {
@@ -309,6 +313,10 @@ install_uv_tools() {
 # --- main -----------------------------------------------------------------
 
 main() {
+  # Dev layout root — create the repos/ + workspaces/ roots so the convention
+  # holds even before the shell config (which also defines WORKSPACE_ROOT) is live.
+  mkdir -p "$WORKSPACE_ROOT/repos" "$WORKSPACE_ROOT/workspaces"
+
   # Shell — zsh is primary; .bashrc covers pods/containers that land in bash.
   link_path "$DOTFILES_DIR/shell/.zshrc" "$HOME/.zshrc"
   link_path "$DOTFILES_DIR/shell/.zshenv" "$HOME/.zshenv"
@@ -330,6 +338,20 @@ main() {
   if [ "$OS" != "Linux" ]; then
     link_path "$DOTFILES_DIR/zed/.config/zed/settings.json" "$HOME/.config/zed/settings.json"
   fi
+
+  # Pi (coding agent). settings.json and models.json are portable (the
+  # Baseten API key is referenced via $BASETEN_API_KEY, which comes from
+  # ~/.profile.secret). auth.json (OAuth tokens/API keys), models-store.json
+  # (remote model cache) and sessions/ are machine-local and intentionally
+  # not linked — see pi/.pi/agent/auth.json.example.
+  link_path "$DOTFILES_DIR/pi/.pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
+  link_path "$DOTFILES_DIR/pi/.pi/agent/models.json" "$HOME/.pi/agent/models.json"
+
+  # User-level agent instructions: one canonical AGENTS.md, symlinked into
+  # every coding harness that reads it. Claude Code reads ~/.claude/AGENTS.md
+  # (its CLAUDE.md imports it via "@AGENTS.md"); pi reads ~/.pi/agent/AGENTS.md.
+  link_path "$DOTFILES_DIR/AGENTS.md" "$HOME/.claude/AGENTS.md"
+  link_path "$DOTFILES_DIR/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
 
   # Toolchain
   install_rust || info "WARN: rust install failed"

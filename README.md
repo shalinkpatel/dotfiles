@@ -27,7 +27,17 @@ git/           .gitconfig + global ignore
 jj/            jujutsu config
 helix/         editor config + languages
 zed/           zed settings (macOS only)
+pi/            pi (coding agent) settings
+AGENTS.md      user-level agent instructions (harness-independent)
 ```
+
+## Layout root
+
+All repos and worktrees live under `$WORKSPACE_ROOT` (default `$HOME/dev`;
+override per machine, e.g. `WORKSPACE_ROOT=/workspace` on dev pods, via
+`~/.profile.secret` or the container env). `install.sh` creates
+`$WORKSPACE_ROOT/repos` and `$WORKSPACE_ROOT/workspaces`; `~/.profile`
+exports the same default so shells and agents see it.
 
 ## Tools
 
@@ -40,10 +50,44 @@ zed/           zed settings (macOS only)
 | fastfetch | GitHub `.deb` |
 | uv, ruff, ty | uv installer + `uv tool` |
 | claude | official installer (claude.ai/install.sh) |
+| pi | config symlinked by install.sh; binary via npm (`npm i -g @earendil-works/pi-coding-agent`) |
 | fzf, jq, htop, zsh, git | apt (base) |
 
 On macOS the same config files are symlinked, but tool installs are left to
 Homebrew (cargo builds and Linux binaries are skipped by an OS check).
+
+## Pi (coding agent)
+
+`pi/` mirrors the pi config layout and is symlinked into `$HOME` by
+`install.sh`:
+
+- `pi/.pi/agent/settings.json` — theme, default provider/model, enabled
+  models, thinking level.
+- `pi/.pi/agent/models.json` — custom providers (Baseten). The API key is
+  referenced as `$BASETEN_API_KEY`, so it resolves from `~/.profile.secret`
+  on each machine; no secrets live in this file.
+
+Machine-local pi state is **not** symlinked or committed: `auth.json`
+(OAuth tokens / API keys), `models-store.json` (remote model metadata cache),
+and `sessions/`. Copy `pi/.pi/agent/auth.json.example` to
+`~/.pi/agent/auth.json` and fill in credentials, or run `/login` in pi to
+populate it. `~/.pi/agent/` is created on first pi run, so the symlinks
+resolve even on a fresh machine.
+
+## AGENTS.md (user-level agent instructions)
+
+`AGENTS.md` at the repo root is the single canonical copy of the user-level
+agent instructions (repo/workspace workflow + writing tropes), independent
+of any coding harness. `install.sh` symlinks it into every harness that reads
+it:
+
+- `~/.claude/AGENTS.md` — Claude Code (`~/.claude/CLAUDE.md` imports it via
+  `@AGENTS.md`).
+- `~/.pi/agent/AGENTS.md` — pi global instructions.
+
+Edit the one file; all harnesses pick it up on the next install. (Because it
+lives at the repo root, it also loads as project context when working inside
+the dotfiles repo itself.)
 
 ## Secrets
 

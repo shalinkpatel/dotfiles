@@ -1,0 +1,5 @@
+{
+  "anthropic": { "type": "api_key", "key": "sk-ant-..." },
+  "openai-codex": { "type": "api_key", "key": "sk-..." },
+  "baseten": { "type": "api_key", "key": "$BASETEN_API_KEY" }
+}
