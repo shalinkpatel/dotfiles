@@ -224,6 +224,39 @@ install_claude() {
   fetch https://claude.ai/install.sh | bash
 }
 
+install_pi() {
+  # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
+  # is interactive, so install the package directly with npm. Needs node/npm:
+  # present via Homebrew on macOS; on Linux pods, install via apt when missing.
+  # Idempotent — skips when pi is already present.
+  if command -v pi >/dev/null 2>&1; then
+    info "pi already installed: $(pi --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  if ! command -v npm >/dev/null 2>&1; then
+    if [ "$OS" = "Linux" ] && command -v apt-get >/dev/null 2>&1; then
+      local sudo_cmd=""
+      if [ "$(id -u)" != "0" ]; then
+        command -v sudo >/dev/null 2>&1 && sudo_cmd="sudo" || { info "Skipping pi (need root for node install)"; return 1; }
+      fi
+      info "Installing nodejs + npm via apt"
+      export DEBIAN_FRONTEND=noninteractive
+      $sudo_cmd apt-get update -qq >/dev/null 2>&1 || true
+      $sudo_cmd apt-get install -y -qq nodejs npm >/dev/null || { info "WARN: node install failed"; return 1; }
+    else
+      info "npm unavailable; skipping pi install"
+      return 1
+    fi
+  fi
+  info "Installing pi via npm"
+  npm install -g --ignore-scripts @earendil-works/pi-coding-agent || return 1
+  if command -v pi >/dev/null 2>&1; then
+    info "pi installed: $(pi --version 2>/dev/null | head -1 || true)"
+  else
+    info "WARN: pi installed but not on PATH"
+  fi
+}
+
 install_fzf() {
   # The apt build of fzf is too old for --zsh/--bash and for zp's
   # --with-shell, so install a modern release binary on Linux. It lands in
@@ -376,6 +409,7 @@ main() {
   install_helix || info "WARN: helix install failed"
   install_fastfetch || info "WARN: fastfetch install failed"
   install_uv_tools || info "WARN: uv tools install failed"
+  install_pi || info "WARN: pi install failed"
   install_claude || info "WARN: claude install failed"
 
   info ""
