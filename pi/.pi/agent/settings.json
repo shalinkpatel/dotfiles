@@ -1,0 +1,20 @@
+{
+  "lastChangelogVersion": "0.83.0",
+  "theme": "dark",
+  "defaultProvider": "baseten",
+  "defaultModel": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "enabledModels": [
+    "anthropic/claude-fable-5",
+    "anthropic/claude-opus-5",
+    "anthropic/claude-sonnet-5",
+    "openai-codex/gpt-5.6-terra",
+    "openai-codex/gpt-5.6-luna",
+    "baseten/deepseek-ai/DeepSeek-V4-Flash-0731",
+    "baseten/moonshotai/Kimi-K3",
+    "baseten/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B",
+    "baseten/thinkingmachines/inkling-small",
+    "baseten/zai-org/GLM-5.2-Fast",
+    "openai-codex/gpt-5.6-sol"
+  ],
+  "defaultThinkingLevel": "high"
+}
