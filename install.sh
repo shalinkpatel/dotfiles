@@ -255,10 +255,11 @@ install_claude() {
 }
 
 install_node() {
-  # pi (>= 0.83) uses import attributes and needs Node >= 22.19. The apt
-  # nodejs on Ubuntu 24.04 is 18.x and can't run pi, so install a modern Node
-  # binary from nodejs.org into ~/.local/opt/node (ahead of /usr/bin on PATH).
-  # On macOS node comes from Homebrew.
+  # pi (>= 0.83) uses import attributes and needs Node >= 22.19, and its
+  # dependencies (pi-fabric, mcporter) need >= 24. The apt nodejs on Ubuntu
+  # 24.04 is 18.x and can't run pi, so install a modern Node LTS binary from
+  # nodejs.org into ~/.local/opt/node (ahead of /usr/bin on PATH). On macOS
+  # node comes from Homebrew.
   if [ "$OS" != "Linux" ]; then
     info "Skipping node binary install on $OS (use Homebrew)"
     return 0
@@ -266,14 +267,14 @@ install_node() {
   if command -v node >/dev/null 2>&1; then
     local cur
     cur="$(node --version 2>/dev/null | sed 's/^v//')"
-    if [ -n "$cur" ] && [ "$(printf '%s\n' "$cur" 22.19.0 | sort -V | head -1)" = "22.19.0" ]; then
+    if [ -n "$cur" ] && [ "$(printf '%s\n' "$cur" 24.0.0 | sort -V | head -1)" = "24.0.0" ]; then
       info "node $cur is new enough for pi"
       return 0
     fi
     info "system node ${cur:-unknown} is too old for pi; installing modern node"
   fi
   local version node_arch
-  version="$(fetch https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt \
+  version="$(fetch https://nodejs.org/dist/latest-v24.x/SHASUMS256.txt \
     | grep -oE 'node-v[0-9.]+-linux-(x64|arm64)\.tar\.xz' | head -1 \
     | sed -E 's/node-v([0-9.]+)-.*/\1/')"
   case "$ARCH" in
@@ -304,9 +305,10 @@ install_node() {
 install_pi() {
   # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
   # is interactive, so install the package directly with npm. pi >= 0.83 needs
-  # Node >= 22.19 (import attributes), so on Linux pods install_node() drops a
-  # modern Node into ~/.local/opt ahead of the apt 18.x. On macOS node comes
-  # from Homebrew. Idempotent — skips when pi is already present.
+  # Node >= 22.19 (import attributes) and its deps need >= 24, so on Linux
+  # pods install_node() drops a Node 24 LTS into ~/.local/opt ahead of the apt
+  # 18.x. On macOS node comes from Homebrew. Idempotent — skips when pi is
+  # already present.
   if command -v pi >/dev/null 2>&1; then
     info "pi already installed: $(pi --version 2>/dev/null | head -1 || true)"
     return 0
