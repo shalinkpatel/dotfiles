@@ -40,6 +40,32 @@ link_path() {
   info "Linked $target_path -> $source_path"
 }
 
+link_path_sudo() {
+  # Like link_path, but for system paths (e.g. /etc/et.cfg) that need root.
+  # Pass the sudo prefix ("sudo" or "") as the third argument.
+  local source_path="$1"
+  local target_path="$2"
+  local sudo_cmd="${3:-}"
+  local target_dir
+
+  target_dir="$(dirname "$target_path")"
+  $sudo_cmd mkdir -p "$target_dir"
+
+  if [ -L "$target_path" ] && [ "$(readlink "$target_path")" = "$source_path" ]; then
+    info "Already linked: $target_path"
+    return 0
+  fi
+
+  if [ -e "$target_path" ] || [ -L "$target_path" ]; then
+    local backup_path="${target_path}.${BACKUP_SUFFIX}"
+    info "Backing up $target_path to $backup_path"
+    $sudo_cmd mv "$target_path" "$backup_path"
+  fi
+
+  $sudo_cmd ln -s "$source_path" "$target_path"
+  info "Linked $target_path -> $source_path"
+}
+
 fetch() {
   # fetch <url> [output-file]; streams to stdout without an output file.
   if command -v curl >/dev/null 2>&1; then
@@ -327,6 +353,63 @@ install_fastfetch() {
   rm -rf "$tmp"
 }
 
+install_et() {
+  # Eternal Terminal (et): re-connectable remote shell. Only arm64 + Windows
+  # release binaries are published (no amd64 .deb), so on Linux pods build from
+  # source via the official Debian/Ubuntu path (cmake -> .deb -> dpkg). The
+  # pod is long-running, so the compile time is fine. On macOS this is
+  # `brew install et`.
+  if command -v et >/dev/null 2>&1; then
+    info "et already installed: $(et --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping et install on $OS (use 'brew install et')"
+    return 0
+  fi
+  local sudo_cmd=""
+  if [ "$(id -u)" != "0" ]; then
+    command -v sudo >/dev/null 2>&1 && sudo_cmd="sudo" || { info "Skipping et (need root for build deps + dpkg)"; return 1; }
+  fi
+  info "Installing et build dependencies via apt"
+  export DEBIAN_FRONTEND=noninteractive
+  $sudo_cmd apt-get update -qq >/dev/null 2>&1 || true
+  $sudo_cmd apt-get install -y -qq \
+    libsodium-dev autoconf libtool libprotobuf-dev protobuf-compiler \
+    libutempter-dev libcurl4-openssl-dev ninja-build cmake zip pkg-config \
+    >/dev/null || { info "WARN: et build deps install failed"; return 1; }
+
+  info "Building et from source (cmake -> .deb)"
+  local tmp
+  tmp="$(mktemp -d)"
+  git clone --recurse-submodules --depth 1 \
+    https://github.com/MisterTea/EternalTerminal.git "$tmp/et" >/dev/null 2>&1 \
+    || { info "WARN: et clone failed"; rm -rf "$tmp"; return 1; }
+  (
+    cd "$tmp/et" || exit 1
+    mkdir build && cd build || exit 1
+    # vcpkg is only used for cross-compiling; force system deps on ARM.
+    if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+      export VCPKG_FORCE_SYSTEM_BINARIES=1
+    fi
+    cmake -DCPACK_GENERATOR=DEB ../ >/dev/null 2>&1 || exit 1
+    make -j"$(nproc)" package >/dev/null 2>&1 || exit 1
+  )
+  if [ $? -ne 0 ]; then
+    info "WARN: et build failed"
+    rm -rf "$tmp"
+    return 1
+  fi
+  $sudo_cmd dpkg --install "$tmp/et/build/"*.deb >/dev/null 2>&1 \
+    || { info "WARN: et dpkg install failed"; rm -rf "$tmp"; return 1; }
+  rm -rf "$tmp"
+  if command -v et >/dev/null 2>&1; then
+    info "et installed: $(et --version 2>/dev/null | head -1 || true)"
+  else
+    info "WARN: et installed but not on PATH"
+  fi
+}
+
 install_uv_tools() {
   if ! command -v uv >/dev/null 2>&1; then
     info "uv unavailable; skipping uv tools"
@@ -414,6 +497,21 @@ main() {
   install_zmx_picker || info "WARN: zmx-picker install failed"
   install_helix || info "WARN: helix install failed"
   install_fastfetch || info "WARN: fastfetch install failed"
+  install_et || info "WARN: et install failed"
+  # etserver config: the .deb installs /etc/et.cfg; replace it with a symlink
+  # to the tracked copy so the pod's etserver config is portable. The et client
+  # reads no config file, so this only matters on Linux (server) hosts.
+  if [ "$OS" = "Linux" ]; then
+    local sudo_cmd=""
+    if [ "$(id -u)" != "0" ]; then
+      command -v sudo >/dev/null 2>&1 && sudo_cmd="sudo"
+    fi
+    if [ -n "$sudo_cmd" ] || [ "$(id -u)" = "0" ]; then
+      link_path_sudo "$DOTFILES_DIR/et/etc/et.cfg" /etc/et.cfg "$sudo_cmd"
+    else
+      info "WARN: skipping /etc/et.cfg link (need root)"
+    fi
+  fi
   install_uv_tools || info "WARN: uv tools install failed"
   install_pi || info "WARN: pi install failed"
   install_claude || info "WARN: claude install failed"
