@@ -68,6 +68,8 @@ installed via apt on Linux pods when missing) and symlinks its config into
   referenced as `$BASETEN_API_KEY`, so it resolves from `~/.profile.secret`
   on each machine; no secrets live in this file.
 - `pi/.pi/agent/mcp.json` — MCP adapter config (host imports + servers).
+- `pi/.pi/web-search.json` — web-search defaults: search provider and the
+  curator workflow (`summary-review`, `auto-summary`, or `none`).
 
 Machine-local pi state is **not** symlinked or committed: `auth.json`
 (OAuth tokens / API keys), `models-store.json` (remote model metadata cache),
