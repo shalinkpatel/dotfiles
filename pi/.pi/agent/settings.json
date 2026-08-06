@@ -23,6 +23,7 @@
     "npm:pi-subagents",
     "npm:pi-simplify",
     "npm:@quintinshaw/pi-dynamic-workflows",
-    "npm:@narumitw/pi-goal"
+    "npm:@narumitw/pi-goal",
+    "npm:pi-fabric"
   ]
 }
