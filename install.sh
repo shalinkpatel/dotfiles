@@ -375,7 +375,7 @@ install_et() {
   export DEBIAN_FRONTEND=noninteractive
   $sudo_cmd apt-get update -qq >/dev/null 2>&1 || true
   $sudo_cmd apt-get install -y -qq \
-    libsodium-dev autoconf libtool libprotobuf-dev protobuf-compiler \
+    libsodium-dev autoconf autoconf-archive libtool libprotobuf-dev protobuf-compiler \
     libutempter-dev libcurl4-openssl-dev ninja-build cmake zip pkg-config \
     >/dev/null || { info "WARN: et build deps install failed"; return 1; }
 
