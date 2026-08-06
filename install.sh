@@ -11,6 +11,10 @@ BACKUP_SUFFIX="bak.$(date +%Y%m%d%H%M%S)"
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
+# ~/.local/bin is where this script's user-local tools land; make sure it's on
+# PATH even when the invoking shell hasn't sourced ~/.profile yet.
+export PATH="$HOME/.local/bin:$PATH"
+
 # Root of the dev layout (repos/ + workspaces/). Same default as ~/.profile;
 # override per machine via the environment (e.g. WORKSPACE_ROOT=/workspace).
 export WORKSPACE_ROOT="${WORKSPACE_ROOT:-$HOME/dev}"
@@ -250,32 +254,75 @@ install_claude() {
   fetch https://claude.ai/install.sh | bash
 }
 
+install_node() {
+  # pi (>= 0.83) uses import attributes and needs Node >= 22.19. The apt
+  # nodejs on Ubuntu 24.04 is 18.x and can't run pi, so install a modern Node
+  # binary from nodejs.org into ~/.local/opt/node (ahead of /usr/bin on PATH).
+  # On macOS node comes from Homebrew.
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping node binary install on $OS (use Homebrew)"
+    return 0
+  fi
+  if command -v node >/dev/null 2>&1; then
+    local cur
+    cur="$(node --version 2>/dev/null | sed 's/^v//')"
+    if [ -n "$cur" ] && [ "$(printf '%s\n' "$cur" 22.19.0 | sort -V | head -1)" = "22.19.0" ]; then
+      info "node $cur is new enough for pi"
+      return 0
+    fi
+    info "system node ${cur:-unknown} is too old for pi; installing modern node"
+  fi
+  local version node_arch
+  version="$(fetch https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt \
+    | grep -oE 'node-v[0-9.]+-linux-(x64|arm64)\.tar\.xz' | head -1 \
+    | sed -E 's/node-v([0-9.]+)-.*/\1/')"
+  case "$ARCH" in
+    x86_64 | amd64) node_arch="x64" ;;
+    aarch64 | arm64) node_arch="arm64" ;;
+    *) info "Unsupported arch for node: $ARCH"; return 1 ;;
+  esac
+  if [ -z "$version" ]; then
+    info "Could not resolve latest node version"
+    return 1
+  fi
+  info "Installing node $version to ~/.local/opt/node"
+  mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://nodejs.org/dist/v${version}/node-v${version}-linux-${node_arch}.tar.xz" "$tmp/node.tar.xz"
+  tar -xJf "$tmp/node.tar.xz" -C "$tmp"
+  rm -rf "$HOME/.local/opt/node"
+  mv "$tmp/node-v${version}-linux-${node_arch}" "$HOME/.local/opt/node"
+  ln -sfn "$HOME/.local/opt/node/bin/node" "$HOME/.local/bin/node"
+  ln -sfn "$HOME/.local/opt/node/bin/npm" "$HOME/.local/bin/npm"
+  ln -sfn "$HOME/.local/opt/node/bin/npx" "$HOME/.local/bin/npx"
+  # Global npm installs (e.g. pi) land their bins in ~/.local/bin, already on PATH.
+  "$HOME/.local/opt/node/bin/npm" config set prefix "$HOME/.local"
+  rm -rf "$tmp"
+}
+
 install_pi() {
   # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
-  # is interactive, so install the package directly with npm. Needs node/npm:
-  # present via Homebrew on macOS; on Linux pods, install via apt when missing.
-  # Idempotent — skips when pi is already present.
+  # is interactive, so install the package directly with npm. pi >= 0.83 needs
+  # Node >= 22.19 (import attributes), so on Linux pods install_node() drops a
+  # modern Node into ~/.local/opt ahead of the apt 18.x. On macOS node comes
+  # from Homebrew. Idempotent — skips when pi is already present.
   if command -v pi >/dev/null 2>&1; then
     info "pi already installed: $(pi --version 2>/dev/null | head -1 || true)"
     return 0
   fi
-  if ! command -v npm >/dev/null 2>&1; then
-    if [ "$OS" = "Linux" ] && command -v apt-get >/dev/null 2>&1; then
-      local sudo_cmd=""
-      if [ "$(id -u)" != "0" ]; then
-        command -v sudo >/dev/null 2>&1 && sudo_cmd="sudo" || { info "Skipping pi (need root for node install)"; return 1; }
-      fi
-      info "Installing nodejs + npm via apt"
-      export DEBIAN_FRONTEND=noninteractive
-      $sudo_cmd apt-get update -qq >/dev/null 2>&1 || true
-      $sudo_cmd apt-get install -y -qq nodejs npm >/dev/null || { info "WARN: node install failed"; return 1; }
-    else
-      info "npm unavailable; skipping pi install"
-      return 1
-    fi
+  install_node || return 1
+  local npm_cmd
+  if [ -x "$HOME/.local/opt/node/bin/npm" ]; then
+    npm_cmd="$HOME/.local/opt/node/bin/npm"
+  elif command -v npm >/dev/null 2>&1; then
+    npm_cmd="npm"
+  else
+    info "npm unavailable; skipping pi install"
+    return 1
   fi
   info "Installing pi via npm"
-  npm install -g --ignore-scripts @earendil-works/pi-coding-agent || return 1
+  "$npm_cmd" install -g --ignore-scripts @earendil-works/pi-coding-agent || return 1
   if command -v pi >/dev/null 2>&1; then
     info "pi installed: $(pi --version 2>/dev/null | head -1 || true)"
   else
