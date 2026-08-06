@@ -63,7 +63,10 @@ Eternal Terminal is `brew install et` on macOS.
 
 `install.sh` installs the pi binary via npm (`install_pi`; needs node/npm,
 installed via apt on Linux pods when missing) and symlinks its config into
-`$HOME`:
+`$HOME`. pi >= 0.83 needs Node >= 22.19 (it uses JSON import attributes), so
+on Linux pods `install_pi` first runs `install_node`, which drops a modern
+Node binary from nodejs.org into `~/.local/opt/node` (ahead of the apt 18.x);
+on macOS node comes from Homebrew.
 
 - `pi/.pi/agent/settings.json` — theme, default provider/model, enabled
   models, thinking level, and the installed-package manifest (`packages`).
