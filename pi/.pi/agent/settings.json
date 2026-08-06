@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.83.0",
   "theme": "dark",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-sol",
+  "defaultProvider": "baseten",
+  "defaultModel": "deepseek-ai/DeepSeek-V4-Flash-0731",
   "enabledModels": [
     "anthropic/claude-fable-5",
     "anthropic/claude-opus-5",
@@ -16,8 +16,13 @@
     "baseten/zai-org/GLM-5.2-Fast",
     "openai-codex/gpt-5.6-sol"
   ],
-  "defaultThinkingLevel": "xhigh",
+  "defaultThinkingLevel": "high",
   "packages": [
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "npm:pi-web-access",
+    "npm:pi-subagents",
+    "npm:pi-simplify",
+    "npm:@quintinshaw/pi-dynamic-workflows",
+    "npm:@narumitw/pi-goal"
   ]
 }
