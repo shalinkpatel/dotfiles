@@ -76,6 +76,8 @@ comes from Homebrew.
   referenced as `$BASETEN_API_KEY`, so it resolves from `~/.profile.secret`
   on each machine; no secrets live in this file.
 - `pi/.pi/agent/mcp.json` — MCP adapter config (host imports + servers).
+- `pi/.mcporter/mcporter.json` — mcporter config backing pi-fabric's `mcp.*`
+  surface (same servers, mcporter schema; symlinked to `~/.mcporter/mcporter.json`).
 - `pi/.pi/web-search.json` — web-search defaults: search provider and the
   curator workflow (`summary-review`, `auto-summary`, or `none`).
 
