@@ -6,6 +6,9 @@ pi/.pi/agent/auth.json
 pi/.pi/agent/models-store.json
 pi/.pi/agent/sessions/
 
+# pi-fabric runtime state (project-scoped mesh/actors) — machine-local
+.pi/fabric/
+
 # Backup files produced by install.sh's link_path
 *.bak.*
 
