@@ -75,7 +75,6 @@ comes from Homebrew.
 - `pi/.pi/agent/models.json` — custom providers (Baseten). The API key is
   referenced as `$BASETEN_API_KEY`, so it resolves from `~/.profile.secret`
   on each machine; no secrets live in this file.
-- `pi/.pi/agent/mcp.json` — MCP adapter config (host imports + servers).
 - `pi/.mcporter/mcporter.json` — mcporter config backing pi-fabric's `mcp.*`
   surface (same servers, mcporter schema; symlinked to `~/.mcporter/mcporter.json`).
 - `pi/.pi/web-search.json` — web-search defaults: search provider and the
@@ -105,45 +104,30 @@ Keep only `npm:`/`git:` sources in the shared manifest. Local-path packages
 are stored relative to `~/.pi/agent` and are machine-specific — keep those
 in project settings (`.pi/settings.json`) instead.
 
-### MCP servers (pi-mcp-adapter)
+### MCP servers (mcporter)
 
-`pi-mcp-adapter` gives pi access to MCP servers without burning context: one
-proxy tool, lazy server startup, on-demand discovery. It's installed as a
-package (see `packages` above) and reads standard MCP configs plus
-host-specific ones:
+MCP servers are provided by mcporter, which backs pi-fabric's `mcp.*` surface
+inside `fabric_exec` programs. The shared server config is
+`pi/.mcporter/mcporter.json` (symlinked to `~/.mcporter/mcporter.json`);
+mcporter also imports servers from Claude Code, Claude Desktop, Codex, and
+other host configs. List what's available with `mcporter list`; authenticate
+OAuth servers with `mcporter auth <server>`.
 
-- `pi/.pi/agent/mcp.json` is symlinked to `~/.pi/agent/mcp.json` and carries
-  the `imports` list — which host configs pi adopts (currently `claude-code`,
-  `claude-desktop`, `codex`). So MCP servers you configure in Claude Code
-  (`~/.claude.json`), Claude Desktop, or Codex are automatically available to
-  pi. Run `pi-mcp-adapter init` to re-scan and update the imports.
-- Shared global servers go in `~/.config/mcp/mcp.json` (highest precedence,
-  tool-agnostic); project servers go in `.mcp.json`. See the adapter's README
-  for the full precedence order.
-- Keep credentials out of committed MCP configs — reference them via env vars
-  (e.g. from `~/.profile.secret`), never inline tokens.
-
-#### Synced claude.ai MCP servers
-
-`mcp.json` includes the 10 claude.ai MCP servers you use (synced from
-`claude mcp list`): Baseten Docs, b10-mcp, Gmail, Google Calendar, Google
-Drive, Linear, Excalidraw, Slack, Notion, Granola.
-
-The providers use different authentication paths:
+The 10 claude.ai servers (Baseten Docs, b10-mcp, Gmail, Google Calendar,
+Google Drive, Linear, Excalidraw, Slack, Notion, Granola) use different auth
+paths:
 
 - Baseten Docs and Excalidraw work without a separate OAuth client.
 - b10-mcp, Linear, Notion, and Granola support dynamic client registration;
-  authenticate in pi via `/mcp` and the adapter stores tokens in the OS
-  keychain. Live read-only calls have been verified for all four.
-- Gmail, Google Calendar, Google Drive, and Slack do not support dynamic
-  client registration. They require pre-registered OAuth clients configured
-  via `~/.profile.secret` as described below.
+  `mcporter auth <server>` completes the browser flow.
+- Gmail, Google Calendar, Google Drive, and Slack require pre-registered OAuth
+  clients configured via `~/.profile.secret` as described below.
 
 ##### Google OAuth (Gmail, Calendar, Drive)
 
 Create one OAuth 2.0 **Desktop app** client in a Google Cloud project. Enable
 the Gmail, Google Calendar, and Google Drive APIs and configure the consent
-screen/test users as needed. The adapter uses the desktop loopback callback
+screen/test users as needed. mcporter uses the desktop loopback callback
 `http://localhost:19876/callback` and requests these scopes separately:
 
 - Gmail: `https://www.googleapis.com/auth/gmail.modify`
@@ -151,29 +135,17 @@ screen/test users as needed. The adapter uses the desktop loopback callback
 - Drive: `https://www.googleapis.com/auth/drive`
 
 Copy the desktop client's ID and secret into `~/.profile.secret` as
-`GOOGLE_MCP_OAUTH_CLIENT_ID` and `GOOGLE_MCP_OAUTH_CLIENT_SECRET`. Start a
-fresh shell (or source `~/.profile`), restart pi, then authenticate each
-Google server through `/mcp`. The config requests offline access and explicit
-consent so refresh tokens are returned.
+`GOOGLE_MCP_OAUTH_CLIENT_ID` and `GOOGLE_MCP_OAUTH_CLIENT_SECRET`, then run
+`mcporter auth gmail google-calendar google-drive` to cache tokens.
 
 ##### Slack OAuth
 
 Create a Slack app in the target workspace. Add
 `http://localhost:19876/callback` under **OAuth & Permissions > Redirect
-URLs**, then add the User Token Scopes listed in `mcp.json`'s
-`slack.oauth.scope`. Copy **Basic Information > App Credentials** into
+URLs**, then add the User Token Scopes listed in `mcporter.json`'s
+`slack.oauthScope`. Copy **Basic Information > App Credentials** into
 `SLACK_MCP_OAUTH_CLIENT_ID` and `SLACK_MCP_OAUTH_CLIENT_SECRET` in
-`~/.profile.secret`. Start a fresh shell, restart pi, then authenticate Slack
-through `/mcp`. An administrator may need to approve the app for the Baseten
-workspace.
-
-##### b10-mcp
-
-b10-mcp is behind claude.ai's proxy (`baseten.runlayer.com`). It uses standard
-MCP OAuth with PKCE and dynamic client registration; the raw claude.ai access
-token is not accepted directly. pi-mcp-adapter completes the browser flow and
-stores a server-scoped access/refresh token in the OS keychain. This path has
-been verified with a live `list_folders` call.
+`~/.profile.secret`, then run `mcporter auth slack`.
 
 ## AGENTS.md (user-level agent instructions)
 
