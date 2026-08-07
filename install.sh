@@ -176,6 +176,42 @@ install_zmx() {
   rm -rf "$tmp"
 }
 
+install_jjui() {
+  # jjui is a TUI for jujutsu (jj). Prebuilt binaries are published for
+  # linux/darwin amd64/arm64; on macOS it's `brew install jjui`.
+  if command -v jjui >/dev/null 2>&1; then
+    info "jjui already installed: $(jjui --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping jjui binary install on $OS (use 'brew install jjui')"
+    return 0
+  fi
+  local version
+  version="$(fetch https://api.github.com/repos/idursun/jjui/releases/latest | grep '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/')"
+  if [ -z "$version" ]; then
+    info "Could not resolve latest jjui version"
+    return 1
+  fi
+  info "Installing jjui $version to ~/.local/bin"
+  mkdir -p "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/idursun/jjui/releases/download/v${version}/jjui-${version}-linux-$(go_asset_arch).zip" "$tmp/jjui.zip"
+  unzip -q "$tmp/jjui.zip" -d "$tmp"
+  # The zip holds one binary named jjui-<version>-<os>-<arch>; install as jjui.
+  local binpath
+  binpath="$(find "$tmp" -type f -name 'jjui-*' | head -1)"
+  if [ -n "$binpath" ]; then
+    install -m 0755 "$binpath" "$HOME/.local/bin/jjui"
+  else
+    info "WARN: jjui binary not found in zip"
+    rm -rf "$tmp"
+    return 1
+  fi
+  rm -rf "$tmp"
+}
+
 install_zmx_picker() {
   # zp is a plain shell script (fuzzy picker for zmx sessions/repos); the
   # formula just installs it from the source tarball. Depends on fzf + zmx
@@ -543,6 +579,7 @@ main() {
 
   install_fzf || info "WARN: fzf install failed"
   install_zmx || info "WARN: zmx install failed"
+  install_jjui || info "WARN: jjui install failed"
   install_zmx_picker || info "WARN: zmx-picker install failed"
   install_helix || info "WARN: helix install failed"
   install_fastfetch || info "WARN: fastfetch install failed"
