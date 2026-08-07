@@ -46,6 +46,7 @@ exports the same default so shells and agents see it.
 |---|---|
 | eza, zoxide, starship, ripgrep, fd, just, jj, numbat | compiled via cargo (full opts) |
 | zmx | GitHub release binary |
+| jjui | GitHub release binary (TUI for jj) |
 | zmx-picker (`zp`) | GitHub source tarball (shell script; needs fzf + zmx) |
 | helix | GitHub release binary + runtime |
 | fastfetch | GitHub `.deb` |
