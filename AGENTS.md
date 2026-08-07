@@ -14,6 +14,24 @@ e.g. `/workspace`) is organized under two roots:
 
 Gotcha when a workspace moves or the layout changes: jj records the workspace-to-repo link as a RELATIVE path in `<workspace>/.jj/repo`, so a moved workspace breaks with "Cannot access ../..../.jj/repo". Fix by rewriting that file with the absolute path to the main repo's `.jj/repo`. When a workspace directory is deleted without `jj workspace forget`, clear the stale registration from the main repo (`jj workspace forget <name>`).
 
+# External Communication
+
+Never post replies to pull request reviews, Slack messages, or any other
+external channel without the user's express consent. The default is to draft
+a suggested reply and present it for approval — do not send anything on the
+user's behalf.
+
+This applies to anything visible to other people: PR review comments and
+replies, Slack threads and DMs, GitHub issue comments, emails, and similar.
+
+When asked to reply to something:
+
+1. Draft the reply in the user's voice and tone.
+2. Show the target (which PR, thread, or message) so the user knows exactly
+   what would be sent and where.
+3. Wait for explicit approval before sending. "Go ahead" or "send it" is
+   approval; silence, "here's a draft", or a suggested reply is not.
+
 # Writing Tropes to Avoid
 
 ## Word Choice
