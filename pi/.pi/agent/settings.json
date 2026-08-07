@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.83.0",
+  "lastChangelogVersion": "0.84.0",
   "theme": "dark",
   "defaultProvider": "baseten",
   "defaultModel": "deepseek-ai/DeepSeek-V4-Flash-0731",
