@@ -544,15 +544,13 @@ main() {
   # Baseten API key is referenced via $BASETEN_API_KEY, which comes from
   # ~/.profile.secret). settings.json also holds the installed-package
   # manifest ("packages"), so pi installs track in git and pi auto-installs
-  # missing packages on startup. mcp.json is the pi MCP adapter config
-  # (host imports + servers). mcporter.json feeds pi-fabric's mcp.* surface
+  # missing packages on startup. mcporter.json feeds pi-fabric's mcp.* surface
   # (same servers, mcporter schema). web-search.json is the pi web-search
   # default (provider + curator workflow). auth.json (OAuth tokens/API keys),
   # models-store.json (remote model cache) and sessions/ are machine-local
   # and intentionally not linked — see pi/.pi/agent/auth.json.example.
   link_path "$DOTFILES_DIR/pi/.pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
   link_path "$DOTFILES_DIR/pi/.pi/agent/models.json" "$HOME/.pi/agent/models.json"
-  link_path "$DOTFILES_DIR/pi/.pi/agent/mcp.json" "$HOME/.pi/agent/mcp.json"
   link_path "$DOTFILES_DIR/pi/.pi/web-search.json" "$HOME/.pi/web-search.json"
   link_path "$DOTFILES_DIR/pi/.mcporter/mcporter.json" "$HOME/.mcporter/mcporter.json"
 
