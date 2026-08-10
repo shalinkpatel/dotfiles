@@ -10,7 +10,21 @@ When working on a repository, do your work in a worktree rather than directly in
 e.g. `/workspace`) is organized under two roots:
 
 - `$WORKSPACE_ROOT/repos/` — main checkouts (baseten, dynamo, ...). Clone new repos here.
-- `$WORKSPACE_ROOT/workspaces/` — ALL jj workspaces and git worktrees, regardless of which repo they belong to. Create new ones under this common root, e.g. `cd $WORKSPACE_ROOT/repos/<repo> && jj workspace add --name <name> $WORKSPACE_ROOT/workspaces/<name>`.
+- `$WORKSPACE_ROOT/workspaces/<feature>/` — workspaces grouped by session or
+  feature. Each `<feature>` folder holds the worktree for every repo that
+  feature touches, so multi-repo work (or several trees of one repo) stays in
+  one place. Create one with
+  `cd $WORKSPACE_ROOT/repos/<repo> && jj workspace add --name <feature> $WORKSPACE_ROOT/workspaces/<feature>/<repo>`.
+  A feature spanning dotfiles and baseten looks like:
+
+  ```
+  $WORKSPACE_ROOT/workspaces/my-feature/
+  ├── dotfiles/   # jj workspace (name: my-feature) of the dotfiles repo
+  └── baseten/    # jj workspace (name: my-feature) of the baseten repo
+  ```
+
+  Need a second tree of the same repo within one feature? Give it a distinct
+  workspace name and path, e.g. `--name my-feature-2 $WORKSPACE_ROOT/workspaces/my-feature/dotfiles-2`.
 
 Gotcha when a workspace moves or the layout changes: jj records the workspace-to-repo link as a RELATIVE path in `<workspace>/.jj/repo`, so a moved workspace breaks with "Cannot access ../..../.jj/repo". Fix by rewriting that file with the absolute path to the main repo's `.jj/repo`. When a workspace directory is deleted without `jj workspace forget`, clear the stale registration from the main repo (`jj workspace forget <name>`).
 
