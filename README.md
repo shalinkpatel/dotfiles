@@ -38,7 +38,9 @@ All repos and worktrees live under `$WORKSPACE_ROOT` (default `$HOME/dev`;
 override per machine, e.g. `WORKSPACE_ROOT=/workspace` on dev pods, via
 `~/.profile.secret` or the container env). `install.sh` creates
 `$WORKSPACE_ROOT/repos` and `$WORKSPACE_ROOT/workspaces`; `~/.profile`
-exports the same default so shells and agents see it.
+exports the same default so shells and agents see it. Workspaces are grouped
+by session/feature under `$WORKSPACE_ROOT/workspaces/<feature>/<repo>` (see
+AGENTS.md).
 
 ## Tools
 
