@@ -53,6 +53,10 @@ AGENTS.md).
 | helix | GitHub release binary + runtime |
 | fastfetch | GitHub `.deb` |
 | et (Eternal Terminal) | source build (cmake -> `.deb`) |
+| erlang + elixir | precompiled (hex.pm OTP + elixir zip) |
+| clojure | official CLI installer (`--prefix ~/.local`; needs JDK) |
+| babashka | GitHub release binary |
+| elixir-ls, clojure-lsp | GitHub release (LSPs; helix picks them up) |
 | uv, ruff, ty | uv installer + `uv tool` |
 | claude | official installer (claude.ai/install.sh) |
 | pi | npm install via install.sh (`install_pi`); config symlinked |
