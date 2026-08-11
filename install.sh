@@ -521,7 +521,7 @@ install_erlang() {
     info "Skipping erlang install on $OS (use 'brew install erlang')"
     return 0
   fi
-  local version="${ERLANG_VERSION:-OTP-27.3}"
+  local version="${ERLANG_VERSION:-OTP-29.0}"
   local tmp
   tmp="$(mktemp -d)"
   if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
@@ -561,7 +561,7 @@ install_elixir() {
   fi
   local version="${ELIXIR_VERSION:-1.20.3}"
   local otp_major
-  otp_major="$(echo "${ERLANG_VERSION:-OTP-27.3}" | sed -E 's/OTP-([0-9]+).*/\1/')"
+  otp_major="$(echo "${ERLANG_VERSION:-OTP-29.0}" | sed -E 's/OTP-([0-9]+).*/\1/')"
   info "Installing elixir $version (otp $otp_major) to ~/.local/opt/elixir"
   mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
   local tmp
