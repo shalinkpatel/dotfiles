@@ -12,7 +12,7 @@ export EDITOR="hx"
 
 # Toolchain versions — single source of truth; install.sh reads these and
 # falls back to the same defaults if they're not set here.
-export ERLANG_VERSION="OTP-27.3"
+export ERLANG_VERSION="OTP-29.0"
 export ELIXIR_VERSION="1.20.3"
 export CLOJURE_VERSION="1.12.5.1664"
 export BABASHKA_VERSION="1.13.219"
