@@ -9,3 +9,18 @@ indent = { tab-width = 2, unit = "  " }
 [[grammar]]
 name = "numbat"
 source = { git = "https://github.com/irevoire/tree-sitter-numbat", rev = "4d9ce55767f7cc2a0ef97dd070de7e4519920607" }
+
+# Babashka (bb) is not built into helix; reuse the clojure grammar + clojure-lsp.
+# Elixir and Clojure are built in (elixir-ls / clojure-lsp) — no override needed.
+[[language]]
+name = "babashka"
+scope = "source.clojure"
+injection-regex = "clojure|bb"
+file-types = ["bb"]
+comment-tokens = ";"
+language-server = { command = "clojure-lsp" }
+indent = { tab-width = 2, unit = "  " }
+
+[[grammar]]
+name = "babashka"
+source = { git = "https://github.com/sogaiu/tree-sitter-clojure", rev = "e43eff80d17cf34852dcd92ca5e6986d23a7040f" }

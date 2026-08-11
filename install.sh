@@ -510,6 +510,191 @@ install_uv_tools() {
     fi
   done
 }
+install_erlang() {
+  # Erlang/OTP precompiled from hex.pm (the builds asdf uses). x86_64 only;
+  # aarch64 falls back to apt. Needed by Elixir. macOS: brew install erlang.
+  if command -v erl >/dev/null 2>&1; then
+    info "erlang already installed"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping erlang install on $OS (use 'brew install erlang')"
+    return 0
+  fi
+  local version="${ERLANG_VERSION:-OTP-27.3}"
+  local tmp
+  tmp="$(mktemp -d)"
+  if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+    local dist="ubuntu-24.04"
+    if ! fetch "https://builds.hex.pm/builds/otp/${dist}/${version}.tar.gz" "$tmp/otp.tar.gz" 2>/dev/null; then
+      dist="ubuntu-22.04"
+      fetch "https://builds.hex.pm/builds/otp/${dist}/${version}.tar.gz" "$tmp/otp.tar.gz" 2>/dev/null || { info "WARN: erlang download failed"; rm -rf "$tmp"; return 1; }
+    fi
+    tar -xzf "$tmp/otp.tar.gz" -C "$tmp"
+    rm -rf "$HOME/.local/opt/erlang"
+    mv "$tmp/${version}" "$HOME/.local/opt/erlang"
+    for b in erl erlc escript erl_call; do
+      ln -sfn "$HOME/.local/opt/erlang/bin/$b" "$HOME/.local/bin/$b"
+    done
+  else
+    local sudo_cmd=""
+    if [ "$(id -u)" != "0" ]; then
+      command -v sudo >/dev/null 2>&1 && sudo_cmd="sudo" || { info "Skipping erlang (need root for apt)"; rm -rf "$tmp"; return 1; }
+    fi
+    export DEBIAN_FRONTEND=noninteractive
+    $sudo_cmd apt-get update -qq >/dev/null 2>&1 || true
+    $sudo_cmd apt-get install -y -qq erlang-base erlang-dev erlang-eunit erlang-parsetools >/dev/null || { info "WARN: apt erlang install failed"; rm -rf "$tmp"; return 1; }
+  fi
+  rm -rf "$tmp"
+}
+
+install_elixir() {
+  # Elixir precompiled zip (elixir-lang/elixir); needs erl on PATH (install_erlang).
+  # macOS: brew install elixir.
+  if command -v elixir >/dev/null 2>&1; then
+    info "elixir already installed: $(elixir --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping elixir install on $OS (use 'brew install elixir')"
+    return 0
+  fi
+  local version="${ELIXIR_VERSION:-1.20.3}"
+  local otp_major
+  otp_major="$(echo "${ERLANG_VERSION:-OTP-27.3}" | sed -E 's/OTP-([0-9]+).*/\1/')"
+  info "Installing elixir $version (otp $otp_major) to ~/.local/opt/elixir"
+  mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/elixir-lang/elixir/releases/download/v${version}/elixir-otp-${otp_major}.zip" "$tmp/elixir.zip" || { info "WARN: elixir download failed"; rm -rf "$tmp"; return 1; }
+  rm -rf "$HOME/.local/opt/elixir"
+  unzip -q "$tmp/elixir.zip" -d "$HOME/.local/opt/elixir"
+  for b in elixir elixirc mix iex; do
+    ln -sfn "$HOME/.local/opt/elixir/bin/$b" "$HOME/.local/bin/$b"
+  done
+  rm -rf "$tmp"
+}
+
+install_java() {
+  # Adoptium Temurin JDK (portable tarball). Needed by Clojure. macOS: brew install openjdk.
+  if command -v java >/dev/null 2>&1; then
+    info "java already installed: $(java -version 2>&1 | head -1 || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping java install on $OS (use 'brew install openjdk')"
+    return 0
+  fi
+  local jdk_arch
+  case "$ARCH" in
+    x86_64 | amd64) jdk_arch="x64" ;;
+    aarch64 | arm64) jdk_arch="aarch64" ;;
+    *) info "Unsupported arch for java: $ARCH"; return 1 ;;
+  esac
+  info "Installing Temurin JDK ${JAVA_VERSION:-21} to ~/.local/opt/java"
+  mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://api.adoptium.net/v3/binary/latest/${JAVA_VERSION:-21}/ga/linux/${jdk_arch}/jdk/hotspot/normal/eclipse" "$tmp/jdk.tar.gz" || { info "WARN: jdk download failed"; rm -rf "$tmp"; return 1; }
+  tar -xzf "$tmp/jdk.tar.gz" -C "$tmp"
+  rm -rf "$HOME/.local/opt/java"
+  mv "$tmp"/jdk-* "$HOME/.local/opt/java"
+  for b in java javac jar; do
+    ln -sfn "$HOME/.local/opt/java/bin/$b" "$HOME/.local/bin/$b"
+  done
+  rm -rf "$tmp"
+}
+
+install_clojure() {
+  # Official Clojure CLI installer with --prefix ~/.local (no root). Needs java.
+  # macOS: brew install clojure.
+  if command -v clojure >/dev/null 2>&1; then
+    info "clojure already installed: $(clojure --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping clojure install on $OS (use 'brew install clojure')"
+    return 0
+  fi
+  info "Installing clojure ${CLOJURE_VERSION:-1.12.5.1664} to ~/.local"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh" "$tmp/linux-install.sh" || { info "WARN: clojure installer download failed"; rm -rf "$tmp"; return 1; }
+  chmod +x "$tmp/linux-install.sh"
+  (cd "$tmp" && ./linux-install.sh --prefix "$HOME/.local") || { info "WARN: clojure install failed"; rm -rf "$tmp"; return 1; }
+  rm -rf "$tmp"
+}
+
+install_babashka() {
+  # Babashka (bb) single static binary. No Homebrew formula, so install the
+  # release binary on both Linux and macOS.
+  if command -v bb >/dev/null 2>&1; then
+    info "babashka already installed: $(bb --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  local version="${BABASHKA_VERSION:-1.13.219}"
+  local os_asset
+  if [ "$OS" = "Linux" ]; then
+    os_asset="linux"
+  elif [ "$OS" = "Darwin" ]; then
+    os_asset="macos"
+  else
+    info "Skipping babashka install on $OS"
+    return 0
+  fi
+  info "Installing babashka $version to ~/.local/bin"
+  mkdir -p "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-${os_asset}-$(go_asset_arch).tar.gz" "$tmp/bb.tar.gz" || { info "WARN: babashka download failed"; rm -rf "$tmp"; return 1; }
+  tar -xzf "$tmp/bb.tar.gz" -C "$tmp" bb
+  install -m 0755 "$tmp/bb" "$HOME/.local/bin/bb"
+  rm -rf "$tmp"
+}
+
+install_elixir_ls() {
+  # Elixir Language Server (elixir-ls zip). Needs elixir on PATH. macOS: brew install elixir-ls.
+  if command -v elixir-ls >/dev/null 2>&1; then
+    info "elixir-ls already installed"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping elixir-ls install on $OS (use 'brew install elixir-ls')"
+    return 0
+  fi
+  local version="${ELIXIR_LS_VERSION:-0.31.1}"
+  info "Installing elixir-ls $version to ~/.local/opt/elixir-ls"
+  mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/elixir-lsp/elixir-ls/releases/download/v${version}/elixir-ls-v${version}.zip" "$tmp/el.zip" || { info "WARN: elixir-ls download failed"; rm -rf "$tmp"; return 1; }
+  rm -rf "$HOME/.local/opt/elixir-ls"
+  unzip -q "$tmp/el.zip" -d "$HOME/.local/opt/elixir-ls"
+  chmod +x "$HOME/.local/opt/elixir-ls/language_server.sh"
+  ln -sfn "$HOME/.local/opt/elixir-ls/language_server.sh" "$HOME/.local/bin/elixir-ls"
+  rm -rf "$tmp"
+}
+
+install_clojure_lsp() {
+  # clojure-lsp native binary. macOS: brew install clojure-lsp.
+  if command -v clojure-lsp >/dev/null 2>&1; then
+    info "clojure-lsp already installed: $(clojure-lsp --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping clojure-lsp install on $OS (use 'brew install clojure-lsp')"
+    return 0
+  fi
+  local version="${CLOJURE_LSP_VERSION:-2026.07.06-14.34.19}"
+  info "Installing clojure-lsp $version to ~/.local/bin"
+  mkdir -p "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://github.com/clojure-lsp/clojure-lsp/releases/download/${version}/clojure-lsp-native-linux-$(go_asset_arch).zip" "$tmp/cl.zip" || { info "WARN: clojure-lsp download failed"; rm -rf "$tmp"; return 1; }
+  unzip -q "$tmp/cl.zip" -d "$tmp"
+  install -m 0755 "$tmp/clojure-lsp" "$HOME/.local/bin/clojure-lsp"
+  rm -rf "$tmp"
+}
 
 # --- main -----------------------------------------------------------------
 
@@ -584,6 +769,16 @@ main() {
   install_helix || info "WARN: helix install failed"
   install_fastfetch || info "WARN: fastfetch install failed"
   install_et || info "WARN: et install failed"
+
+  # Languages + dev deps (LSPs). Order matters: erlang before elixir, java
+  # before clojure, elixir before elixir-ls.
+  install_erlang || info "WARN: erlang install failed"
+  install_elixir || info "WARN: elixir install failed"
+  install_java || info "WARN: java install failed"
+  install_clojure || info "WARN: clojure install failed"
+  install_babashka || info "WARN: babashka install failed"
+  install_elixir_ls || info "WARN: elixir-ls install failed"
+  install_clojure_lsp || info "WARN: clojure-lsp install failed"
   # etserver config: the .deb installs /etc/et.cfg; replace it with a symlink
   # to the tracked copy so the pod's etserver config is portable. The et client
   # reads no config file, so this only matters on Linux (server) hosts.
