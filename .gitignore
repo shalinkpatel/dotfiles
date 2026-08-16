@@ -9,6 +9,9 @@ pi/.pi/agent/sessions/
 # pi-fabric runtime state (project-scoped mesh/actors) — machine-local
 .pi/fabric/
 
+# pi-subagents run artifacts (written to cwd by the subagent tool)
+.pi-subagents/
+
 # Backup files produced by install.sh's link_path
 *.bak.*
 
