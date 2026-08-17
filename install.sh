@@ -281,13 +281,30 @@ install_helix() {
 
 install_claude() {
   # Native installer; works on macOS and Linux, lands in ~/.local/bin (already
-  # on PATH via .profile). Idempotent — skips when claude is already present.
+  # on PATH via .profile). Falls back to the npm package when the official
+  # installer doesn't produce claude (e.g. claude.ai/install.sh 403s from some
+  # cluster egresses). Idempotent — skips when claude is already present.
   if command -v claude >/dev/null 2>&1; then
     info "Claude Code already installed: $(claude --version 2>/dev/null || true)"
     return 0
   fi
   info "Installing Claude Code"
   fetch https://claude.ai/install.sh | bash
+  if command -v claude >/dev/null 2>&1; then
+    info "claude installed: $(claude --version 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  info "Official installer did not produce claude (403/unreachable); falling back to npm"
+  if ! command -v npm >/dev/null 2>&1; then
+    info "npm unavailable; claude install skipped"
+    return 1
+  fi
+  npm install -g @anthropic-ai/claude-code || { info "WARN: claude npm install failed"; return 1; }
+  if command -v claude >/dev/null 2>&1; then
+    info "claude installed via npm: $(claude --version 2>/dev/null | head -1 || true)"
+  else
+    info "WARN: claude installed but not on PATH"
+  fi
 }
 
 install_node() {
