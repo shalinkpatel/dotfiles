@@ -60,6 +60,7 @@ AGENTS.md).
 | uv, ruff, ty | uv installer + `uv tool` |
 | claude | official installer (claude.ai/install.sh) |
 | pi | npm install via install.sh (`install_pi`); config symlinked |
+| bun | official installer (bun.sh/install) into `~/.local/opt/bun` |
 | fzf, jq, htop, zsh, git | apt (base) |
 
 On macOS the same config files are symlinked, but tool installs are left to
