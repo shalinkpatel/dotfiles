@@ -355,6 +355,37 @@ install_node() {
   rm -rf "$tmp"
 }
 
+install_bun() {
+  # Bun (JS runtime). The official installer appends a PATH block to
+  # ~/.zshrc/~/.bashrc — but the dotfiles manage those (symlinked into the
+  # repo), so install to ~/.local/opt/bun, strip that block back off, and
+  # symlink bun into ~/.local/bin (already on PATH via .profile). On macOS
+  # this is `brew install oven-sh/bun/bun`.
+  if command -v bun >/dev/null 2>&1; then
+    info "bun already installed: $(bun --version 2>/dev/null || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping bun install on $OS (use 'brew install oven-sh/bun/bun')"
+    return 0
+  fi
+  info "Installing bun to ~/.local/opt/bun"
+  export BUN_INSTALL="$HOME/.local/opt/bun"
+  # Isolate the installer's HOME so it can't append its bun PATH block to the
+  # symlinked shell rc files (the dotfiles own PATH via ~/.profile).
+  local fake_home
+  fake_home="$(mktemp -d)"
+  HOME="$fake_home" fetch https://bun.sh/install | bash
+  rm -rf "$fake_home"
+  if [ -x "$HOME/.local/opt/bun/bin/bun" ]; then
+    ln -sfn "$HOME/.local/opt/bun/bin/bun" "$HOME/.local/bin/bun"
+    info "bun installed: $(bun --version 2>/dev/null || true)"
+  else
+    info "WARN: bun not found after install"
+    return 1
+  fi
+}
+
 install_pi() {
   # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
   # is interactive, so install the package directly with npm. pi >= 0.83 needs
@@ -812,6 +843,7 @@ main() {
   fi
   install_uv_tools || info "WARN: uv tools install failed"
   install_pi || info "WARN: pi install failed"
+  install_bun || info "WARN: bun install failed"
   install_claude || info "WARN: claude install failed"
 
   info ""
