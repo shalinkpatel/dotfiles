@@ -28,6 +28,32 @@ e.g. `/workspace`) is organized under two roots:
 
 Gotcha when a workspace moves or the layout changes: jj records the workspace-to-repo link as a RELATIVE path in `<workspace>/.jj/repo`, so a moved workspace breaks with "Cannot access ../..../.jj/repo". Fix by rewriting that file with the absolute path to the main repo's `.jj/repo`. When a workspace directory is deleted without `jj workspace forget`, clear the stale registration from the main repo (`jj workspace forget <name>`).
 
+## Stacked PRs (stack-pr)
+
+Use `stack-pr` to turn a linear series of local commits into a native GitHub
+stack — one non-merge commit per pull request layer. The paired `gh stack`
+extension (dukebw/gh-stack) handles remote stack state, branch pushes,
+reordering, removal, and merge state.
+
+Workflow:
+
+1. Make one commit per reviewable layer (each commit becomes one PR).
+2. `stack-pr view` — inspect the reconciliation plan. It fetches the remote
+   and replays local layers in a disposable worktree; it does not change the
+   source branch or GitHub.
+3. `stack-pr export` — with a clean working tree, adds stable branch
+   identities to commits that lack them, replays active patches onto the
+   latest target, and invokes the native reconciler to create the stack. The
+   source branch is never pushed.
+
+Notes:
+
+- `export` requires a clean working tree.
+- Adding a branch identity rewrites that commit and its descendants, which
+  invalidates existing commit signatures.
+- The only commit metadata owned by stack-pr is the `stack-pr-branch:`
+  trailer; legacy `stack-info:` trailers are rejected.
+
 # External Communication
 
 Never post replies to pull request reviews, Slack messages, or any other
