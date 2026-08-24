@@ -558,6 +558,28 @@ install_uv_tools() {
     fi
   done
 }
+
+install_stack_pr() {
+  # stack-pr: one local commit = one PR layer in a native GitHub stack.
+  # Python tool via uv tool, plus the paired gh-stack CLI extension (replaces
+  # the official github/gh-stack). Needs uv + gh (both installed by install.sh).
+  if command -v stack-pr >/dev/null 2>&1; then
+    info "stack-pr already installed: $(stack-pr --help 2>/dev/null | head -1 || true)"
+    return 0
+  fi
+  if ! command -v uv >/dev/null 2>&1; then
+    info "uv unavailable; skipping stack-pr"
+    return 1
+  fi
+  info "Installing stack-pr via uv tool"
+  uv tool install git+https://github.com/dukebw/stack-pr.git || { info "WARN: stack-pr install failed"; return 1; }
+  if command -v gh >/dev/null 2>&1; then
+    gh extension remove stack 2>/dev/null || true
+    gh extension install dukebw/gh-stack || info "WARN: gh-stack extension install failed"
+  else
+    info "gh unavailable; skipping gh-stack extension"
+  fi
+}
 install_erlang() {
   # Erlang/OTP precompiled from hex.pm (the builds asdf uses). x86_64 only;
   # aarch64 falls back to apt. Needed by Elixir. macOS: brew install erlang.
@@ -842,6 +864,7 @@ main() {
     fi
   fi
   install_uv_tools || info "WARN: uv tools install failed"
+  install_stack_pr || info "WARN: stack-pr install failed"
   install_pi || info "WARN: pi install failed"
   install_bun || info "WARN: bun install failed"
   install_claude || info "WARN: claude install failed"

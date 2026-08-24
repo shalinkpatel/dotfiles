@@ -58,6 +58,7 @@ AGENTS.md).
 | babashka | GitHub release binary |
 | elixir-ls, clojure-lsp | GitHub release (LSPs; helix picks them up) |
 | uv, ruff, ty | uv installer + `uv tool` |
+| stack-pr | `uv tool` (git) + `gh` extension (`dukebw/gh-stack`) |
 | claude | official installer (claude.ai/install.sh) |
 | pi | npm install via install.sh (`install_pi`); config symlinked |
 | bun | official installer (bun.sh/install) into `~/.local/opt/bun` |
