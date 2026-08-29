@@ -54,6 +54,10 @@
     "granola": {
       "url": "https://mcp.granola.ai/mcp",
       "auth": "oauth"
+    },
+    "honeycomb": {
+      "url": "https://mcp.honeycomb.io/mcp",
+      "auth": "oauth"
     }
   }
 }
