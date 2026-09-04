@@ -386,6 +386,31 @@ install_bun() {
   fi
 }
 
+install_hunk() {
+  # Hunk: review-first terminal diff viewer for agent-authored changesets.
+  # Official installer puts the binary in ~/.hunk/bin; use --no-modify-path so
+  # it doesn't touch the symlinked shell rc files, and symlink into
+  # ~/.local/bin (already on PATH via .profile). On macOS this is
+  # `brew install hunk`.
+  if command -v hunk >/dev/null 2>&1; then
+    info "hunk already installed: $(hunk --version 2>/dev/null || true)"
+    return 0
+  fi
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping hunk install on $OS (use 'brew install hunk')"
+    return 0
+  fi
+  info "Installing hunk to ~/.hunk"
+  fetch https://hunk.dev/install.sh | sh -s -- --no-modify-path
+  if [ -x "$HOME/.hunk/bin/hunk" ]; then
+    ln -sfn "$HOME/.hunk/bin/hunk" "$HOME/.local/bin/hunk"
+    info "hunk installed: $(hunk --version 2>/dev/null || true)"
+  else
+    info "WARN: hunk not found after install"
+    return 1
+  fi
+}
+
 install_pi() {
   # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
   # is interactive, so install the package directly with npm. pi >= 0.83 needs
@@ -867,6 +892,7 @@ main() {
   install_stack_pr || info "WARN: stack-pr install failed"
   install_pi || info "WARN: pi install failed"
   install_bun || info "WARN: bun install failed"
+  install_hunk || info "WARN: hunk install failed"
   install_claude || info "WARN: claude install failed"
 
   info ""
