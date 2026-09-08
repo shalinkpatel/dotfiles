@@ -21,6 +21,7 @@
     "npm:pi-web-access",
     "npm:pi-simplify",
     "npm:pi-fabric",
-    "npm:@termdraw/pi"
+    "npm:@termdraw/pi",
+    "npm:@nteract/pi"
   ]
 }

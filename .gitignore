@@ -17,3 +17,6 @@ pi/.pi/agent/sessions/
 
 # OS cruft
 .DS_Store
+
+# Erlang crash dumps (erl_crash.dump) dropped by the erlang install
+erl_crash.dump
