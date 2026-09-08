@@ -63,6 +63,7 @@ AGENTS.md).
 | pi | npm install via install.sh (`install_pi`); config symlinked |
 | bun | official installer (bun.sh/install) into `~/.local/opt/bun` |
 | hunk | official installer (hunk.dev/install.sh) into `~/.hunk` |
+| nteract | official installer (sh.nteract.io) into `~/.local/share/nteract` |
 | fzf, jq, htop, zsh, git | apt (base) |
 
 On macOS the same config files are symlinked, but tool installs are left to

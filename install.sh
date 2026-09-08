@@ -411,6 +411,25 @@ install_hunk() {
   fi
 }
 
+install_nteract() {
+  # nteract: notebook/code editor (AppImage on Linux, .app on macOS) plus
+  # runt/runtimed/nteract-mcp sidecars. Official installer (sh.nteract.io)
+  # installs to ~/.local/share/nteract and symlinks into ~/.local/bin
+  # (already on PATH via .profile). No rc changes; works on Linux and macOS.
+  if command -v nteract-mcp >/dev/null 2>&1; then
+    info "nteract already installed"
+    return 0
+  fi
+  info "Installing nteract"
+  fetch https://sh.nteract.io | bash
+  if command -v nteract-mcp >/dev/null 2>&1; then
+    info "nteract installed"
+  else
+    info "WARN: nteract not found after install"
+    return 1
+  fi
+}
+
 install_pi() {
   # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
   # is interactive, so install the package directly with npm. pi >= 0.83 needs
@@ -893,6 +912,7 @@ main() {
   install_pi || info "WARN: pi install failed"
   install_bun || info "WARN: bun install failed"
   install_hunk || info "WARN: hunk install failed"
+  install_nteract || info "WARN: nteract install failed"
   install_claude || info "WARN: claude install failed"
 
   info ""
