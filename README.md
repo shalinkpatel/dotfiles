@@ -46,7 +46,7 @@ AGENTS.md).
 
 | Tool | Source on pod |
 |---|---|
-| eza, zoxide, starship, ripgrep, fd, just, jj, numbat | compiled via cargo (full opts) |
+| eza, zoxide, starship, ripgrep, fd, just, jj, numbat, markless | compiled via cargo (full opts) |
 | zmx | GitHub release binary |
 | jjui | GitHub release binary (TUI for jj) |
 | zmx-picker (`zp`) | GitHub source tarball (shell script; needs fzf + zmx) |

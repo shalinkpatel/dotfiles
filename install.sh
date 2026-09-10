@@ -872,6 +872,7 @@ main() {
     compile_tool just
     compile_tool jj-cli jj
     compile_tool numbat-cli numbat
+    compile_tool markless
   else
     info "SKIP_CARGO=1: skipping cargo builds"
   fi
