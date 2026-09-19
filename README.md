@@ -66,19 +66,21 @@ AGENTS.md).
 | nteract | official installer (sh.nteract.io) into `~/.local/share/nteract` |
 | fzf, jq, htop, zsh, git | apt (base) |
 
-On macOS the same config files are symlinked, but tool installs are left to
-Homebrew (cargo builds and Linux binaries are skipped by an OS check).
+On macOS the same config files are symlinked; most tool installs are left to
+Homebrew (cargo builds and Linux binaries are skipped by an OS check). pi and
+its node are installed user-local by `install.sh` just like on Linux.
 Eternal Terminal is `brew install et` on macOS.
 
 ## Pi (coding agent)
 
-`install.sh` installs the pi binary via npm (`install_pi`; needs node/npm,
-installed via apt on Linux pods when missing) and symlinks its config into
-`$HOME`. pi >= 0.83 needs Node >= 22.19 (it uses JSON import attributes) and
-its dependencies (pi-fabric, mcporter) need >= 24, so on Linux pods
+`install.sh` installs the pi binary via npm (`install_pi`) and symlinks its
+config into `$HOME`. pi >= 0.83 needs Node >= 22.19 (it uses JSON import
+attributes) and its dependencies (pi-fabric, mcporter) need >= 24, so
 `install_pi` first runs `install_node`, which drops a Node 24 LTS binary from
-nodejs.org into `~/.local/opt/node` (ahead of the apt 18.x); on macOS node
-comes from Homebrew.
+nodejs.org into `~/.local/opt/node` (ahead of an old apt or /usr/local node on
+PATH) unless the node on PATH is already new enough (e.g. Homebrew). If the
+system npm's global prefix isn't user-writable, pi installs with
+`--prefix ~/.local`. Everything stays user-local — no sudo.
 
 - `pi/.pi/agent/settings.json` — theme, default provider/model, enabled
   models, thinking level, and the installed-package manifest (`packages`).
