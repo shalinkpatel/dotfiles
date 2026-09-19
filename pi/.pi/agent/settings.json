@@ -23,6 +23,7 @@
     "npm:pi-fabric",
     "npm:@termdraw/pi",
     "npm:@nteract/pi",
-    "npm:@dietrichgebert/ponytail"
+    "npm:@dietrichgebert/ponytail",
+    "git:github.com/shalinkpatel/pi-perf"
   ]
 }
