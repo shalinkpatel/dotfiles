@@ -24,6 +24,7 @@
     "npm:@termdraw/pi",
     "npm:@nteract/pi",
     "npm:@dietrichgebert/ponytail",
-    "git:github.com/shalinkpatel/pi-perf"
+    "git:github.com/shalinkpatel/pi-perf",
+    "npm:pi-caveman"
   ]
 }
