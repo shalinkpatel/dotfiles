@@ -867,6 +867,12 @@ main() {
   link_path "$DOTFILES_DIR/pi/.pi/web-search.json" "$HOME/.pi/web-search.json"
   link_path "$DOTFILES_DIR/pi/.mcporter/mcporter.json" "$HOME/.mcporter/mcporter.json"
 
+  # Pi-package configs that live outside the pi package manifest: ponytail
+  # reads ~/.config/ponytail/config.json (defaultMode), pi-caveman reads
+  # ~/.pi/agent/caveman.json (defaultLevel + status bar).
+  link_path "$DOTFILES_DIR/ponytail/.config/ponytail/config.json" "$HOME/.config/ponytail/config.json"
+  link_path "$DOTFILES_DIR/pi/.pi/agent/caveman.json" "$HOME/.pi/agent/caveman.json"
+
   # User-level agent instructions: one canonical AGENTS.md, symlinked into
   # every coding harness that reads it. Claude Code reads ~/.claude/AGENTS.md
   # (its CLAUDE.md imports it via "@AGENTS.md"); pi reads ~/.pi/agent/AGENTS.md.
