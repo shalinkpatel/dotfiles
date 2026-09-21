@@ -873,6 +873,10 @@ main() {
   link_path "$DOTFILES_DIR/ponytail/.config/ponytail/config.json" "$HOME/.config/ponytail/config.json"
   link_path "$DOTFILES_DIR/pi/.pi/agent/caveman.json" "$HOME/.pi/agent/caveman.json"
 
+  # Global extension (auto-discovered from ~/.pi/agent/extensions) that pins the
+  # footer status order to pi-perf, ponytail, caveman.
+  link_path "$DOTFILES_DIR/pi/.pi/agent/extensions/footer-status-order.ts" "$HOME/.pi/agent/extensions/footer-status-order.ts"
+
   # User-level agent instructions: one canonical AGENTS.md, symlinked into
   # every coding harness that reads it. Claude Code reads ~/.claude/AGENTS.md
   # (its CLAUDE.md imports it via "@AGENTS.md"); pi reads ~/.pi/agent/AGENTS.md.
