@@ -162,7 +162,8 @@ URLs**, then add the User Token Scopes listed in `mcporter.json`'s
 ## AGENTS.md (user-level agent instructions)
 
 `AGENTS.md` at the repo root is the single canonical copy of the user-level
-agent instructions (repo/workspace workflow + writing tropes), independent
+agent instructions (repo/workspace workflow, external-communication
+consent), independent
 of any coding harness. `install.sh` symlinks it into every harness that reads
 it:
 
