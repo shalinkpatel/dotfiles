@@ -16,6 +16,9 @@
  * provider, and the footer sorts by entry key). If either changes, the order
  * quietly reverts and nothing throws. Delete this file once pi grows a status
  * ordering setting.
+ *
+ * The patch is idempotent across /reload: the guard rides on the status map, which
+ * outlives the module instance.
  */
 import type { ExtensionAPI, ReadonlyFooterDataProvider } from "@earendil-works/pi-coding-agent";
 
@@ -24,16 +27,21 @@ export const PINNED_STATUS_ORDER = ["perf", "ponytail", "caveman"];
 /** Sort keys for the pinned statuses: index for them, "9"+key for the rest. */
 const restKey = (key: string) => `9${key}`;
 
-const patched = new WeakSet<Map<string, string>>();
+// The guard lives on the patched map, not in module scope. /reload re-evaluates this
+// module (pi loads extensions with jiti moduleCache:false) while the status map, owned
+// by the long-lived FooterDataProvider, survives. A module-level guard comes back empty
+// on reload and patches the already-patched iterator, which renders every status twice.
+// Symbol.for survives module identity.
+const PATCHED = Symbol.for("pi.footer-status-order.patched");
 
 /** Re-key a status map's entries so a consumer sorting by key sees `order` first. */
 export function pinStatusOrder(
   statuses: ReadonlyMap<string, string>,
   order: readonly string[] = PINNED_STATUS_ORDER,
 ): void {
-  const map = statuses as Map<string, string>;
-  if (patched.has(map)) return; // a /reload would otherwise wrap the iterator twice
-  patched.add(map);
+  const map = statuses as Map<string, string> & { [PATCHED]?: boolean };
+  if (map[PATCHED]) return;
+  map[PATCHED] = true;
 
   const realEntries = map.entries.bind(map);
   const pinned = new Set(order);

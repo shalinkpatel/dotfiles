@@ -30,5 +30,11 @@ assertLine(all, "P2 C");
 pinStatusOrder(all); // reload path must not wrap the iterator twice
 assertLine(all, "P2 C");
 
+// /reload loads the extension module with jiti moduleCache:false, so module scope is
+// fresh while the status map survives. A cache-busted import is the same situation.
+const afterReload = await import("./footer-status-order.ts?reload=1");
+afterReload.pinStatusOrder(all);
+assertLine(all, "P2 C");
+
 pinStatusOrder(new Map([["perf", "F"]]), ["perf"]);
 console.log("footer-status-order: ok");
