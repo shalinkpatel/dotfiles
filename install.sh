@@ -877,6 +877,9 @@ main() {
   # footer status order to pi-perf, ponytail, caveman.
   link_path "$DOTFILES_DIR/pi/.pi/agent/extensions/footer-status-order.ts" "$HOME/.pi/agent/extensions/footer-status-order.ts"
 
+  # User skills (auto-discovered from ~/.pi/agent/skills, one directory per skill).
+  link_path "$DOTFILES_DIR/pi/.pi/agent/skills/hunk-review" "$HOME/.pi/agent/skills/hunk-review"
+
   # User-level agent instructions: one canonical AGENTS.md, symlinked into
   # every coding harness that reads it. Claude Code reads ~/.claude/AGENTS.md
   # (its CLAUDE.md imports it via "@AGENTS.md"); pi reads ~/.pi/agent/AGENTS.md.
