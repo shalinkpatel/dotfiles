@@ -1,3 +1,29 @@
+# Secrets and Service Accounts: Explicit Approval Required
+
+NEVER create, overwrite, rotate, revoke, delete, or otherwise change secrets,
+credentials, API keys, tokens, passwords, certificates, or secret-store entries
+without the user's explicit approval for the specific operation and target.
+The same rule applies to service-account configuration, roles, permissions,
+scopes, and access policies, and to changing which credentials a service uses.
+
+Shared service accounts, especially **FDE Internal** and **Model APIs**, are
+production-sensitive. Never use them for experiments, credential resets, or
+"fixes" that could affect other users or services without explicit approval.
+
+Before any such change:
+1. Identify the exact account, environment, and resource by name or identifier
+   (never expose secret values), the proposed operation, and its expected impact.
+2. Present that scope to the user and wait for explicit approval. General
+   permission to investigate, fix, test, deploy, or set up a service is NOT
+   permission to change its secrets or service-account access.
+3. Execute only the approved change. Ask again if the target or scope changes.
+
+This applies to direct edits and indirect effects of commands, scripts, tests,
+installers, deployments, and API calls. If their effects are uncertain, STOP:
+inspect read-only or ask first. Never rotate or replace credentials as an
+unapproved workaround. Never print, log, commit, or copy secret values into
+chat, source code, or other unapproved locations.
+
 # Repository Workflow
 
 ## Worktrees
