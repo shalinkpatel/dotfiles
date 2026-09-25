@@ -127,44 +127,21 @@ not advertised, so nothing is linked there.
 
 MCP servers are provided by mcporter, which backs pi-fabric's `mcp.*` surface
 inside `fabric_exec` programs. The shared server config is
-`pi/.mcporter/mcporter.json` (symlinked to `~/.mcporter/mcporter.json`);
-mcporter also imports servers from Claude Code, Claude Desktop, Codex, and
-other host configs. List what's available with `mcporter list`; authenticate
-OAuth servers with `mcporter auth <server>`.
+`pi/.mcporter/mcporter.json` (symlinked to `~/.mcporter/mcporter.json`).
 
-The 10 claude.ai servers (Baseten Docs, b10-mcp, Gmail, Google Calendar,
-Google Drive, Linear, Excalidraw, Slack, Notion, Granola) use different auth
-paths:
+The only server is **`runlayer`**, Runlayer's unified plugin proxy — it fronts
+the workspace's connected apps (Slack, Gmail, Drive, and the rest) behind
+`search_tools` / `execute_tool`, so one server replaces a per-app list. It is
+addressed by the server's UUID path, not the `.../proxy/runlayer/mcp` alias:
+the alias serves protected-resource metadata for the UUID path, which OAuth
+clients (mcporter and the Runlayer CLI alike) reject as a mismatch. The file sets `"imports": []` deliberately so `runlayer` is pi's only MCP
+server; mcporter would otherwise merge servers from host configs (Codex,
+Claude Code, Claude Desktop, and others).
 
-- Baseten Docs and Excalidraw work without a separate OAuth client.
-- b10-mcp, Linear, Notion, and Granola support dynamic client registration;
-  `mcporter auth <server>` completes the browser flow.
-- Gmail, Google Calendar, Google Drive, and Slack require pre-registered OAuth
-  clients configured via `~/.profile.secret` as described below.
-
-##### Google OAuth (Gmail, Calendar, Drive)
-
-Create one OAuth 2.0 **Desktop app** client in a Google Cloud project. Enable
-the Gmail, Google Calendar, and Google Drive APIs and configure the consent
-screen/test users as needed. mcporter uses the desktop loopback callback
-`http://localhost:19876/callback` and requests these scopes separately:
-
-- Gmail: `https://www.googleapis.com/auth/gmail.modify`
-- Calendar: `https://www.googleapis.com/auth/calendar`
-- Drive: `https://www.googleapis.com/auth/drive`
-
-Copy the desktop client's ID and secret into `~/.profile.secret` as
-`GOOGLE_MCP_OAUTH_CLIENT_ID` and `GOOGLE_MCP_OAUTH_CLIENT_SECRET`, then run
-`mcporter auth gmail google-calendar google-drive` to cache tokens.
-
-##### Slack OAuth
-
-Create a Slack app in the target workspace. Add
-`http://localhost:19876/callback` under **OAuth & Permissions > Redirect
-URLs**, then add the User Token Scopes listed in `mcporter.json`'s
-`slack.oauthScope`. Copy **Basic Information > App Credentials** into
-`SLACK_MCP_OAUTH_CLIENT_ID` and `SLACK_MCP_OAUTH_CLIENT_SECRET` in
-`~/.profile.secret`, then run `mcporter auth slack`.
+Authenticate once with `mcporter auth runlayer` (browser flow; repeat when the
+cached token expires). Tokens live in `~/.mcporter/credentials.json`, which is
+machine-local and never committed. `mcporter` ships with pi-fabric:
+`~/.pi/agent/npm/node_modules/.bin/mcporter`.
 
 ## AGENTS.md (user-level agent instructions)
 
