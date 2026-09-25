@@ -118,12 +118,10 @@ in project settings (`.pi/settings.json`) instead.
 
 ### Pi skills
 
-User skills live in `pi/.pi/agent/skills/<name>/SKILL.md` and are symlinked
-into `~/.pi/agent/skills/` by `install.sh`, where pi discovers them and
-registers `/skill:<name>`. `hunk-review` documents reviewing a diff with the
-user inside pi through the pi-hunk-island overlay: seeded reading-order notes,
-a watcher that wakes the agent on the user's notes, threaded replies, and
-collection on quit.
+Skills ship inside pi packages (`pi.skills` in a package manifest), which is
+the only form pi advertises to the model; `pi-hunk-island` carries
+`hunk-review`. A bare directory under `~/.pi/agent/skills/` is discovered but
+not advertised, so nothing is linked there.
 
 ### MCP servers (mcporter)
 
