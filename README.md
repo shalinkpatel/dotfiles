@@ -129,19 +129,17 @@ MCP servers are provided by mcporter, which backs pi-fabric's `mcp.*` surface
 inside `fabric_exec` programs. The shared server config is
 `pi/.mcporter/mcporter.json` (symlinked to `~/.mcporter/mcporter.json`).
 
-The only server is **`runlayer`**, Runlayer's unified plugin proxy — it fronts
-the workspace's connected apps (Slack, Gmail, Drive, and the rest) behind
-`search_tools` / `execute_tool`, so one server replaces a per-app list. It is
-addressed by the server's UUID path, not the `.../proxy/runlayer/mcp` alias:
-the alias serves protected-resource metadata for the UUID path, which OAuth
-clients (mcporter and the Runlayer CLI alike) reject as a mismatch. The file sets `"imports": []` deliberately so `runlayer` is pi's only MCP
-server; mcporter would otherwise merge servers from host configs (Codex,
-Claude Code, Claude Desktop, and others).
+The only server is **`runlayer-plugin`**, Runlayer's unified plugin proxy at
+`https://baseten.runlayer.com/mcp` — it fronts the workspace's connected apps
+(Slack, Gmail, Drive, and the rest) behind `search_tools` / `execute_tool`, so
+one server replaces a per-app list. The file sets `"imports": []` deliberately
+so `runlayer-plugin` is pi's only MCP server; mcporter would otherwise merge
+servers from host configs (Codex, Claude Code, Claude Desktop, and others).
 
-Authenticate once with `mcporter auth runlayer` (browser flow; repeat when the
-cached token expires). Tokens live in `~/.mcporter/credentials.json`, which is
-machine-local and never committed. `mcporter` ships with pi-fabric:
-`~/.pi/agent/npm/node_modules/.bin/mcporter`.
+No OAuth entry is needed for this endpoint. (The previous `runlayer` entry —
+the workspace admin API behind `.../api/v1/proxy/<uuid>/mcp` — was removed;
+that server manages servers/policies/users rather than executing connector
+tools.)
 
 ## AGENTS.md (user-level agent instructions)
 

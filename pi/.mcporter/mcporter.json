@@ -1,9 +1,8 @@
 {
   "imports": [],
   "mcpServers": {
-    "runlayer": {
-      "url": "https://baseten.runlayer.com/api/v1/proxy/d0b2d0c6-5d87-4f87-a2e1-7f0a60a6c0b5/mcp",
-      "auth": "oauth"
+    "runlayer-plugin": {
+      "url": "https://baseten.runlayer.com/mcp"
     }
   }
 }
