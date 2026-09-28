@@ -25,6 +25,7 @@
     "npm:@dietrichgebert/ponytail",
     "git:github.com/shalinkpatel/pi-perf",
     "npm:pi-caveman",
-    "git:github.com/shalinkpatel/pi-hunk-island"
+    "git:github.com/shalinkpatel/pi-hunk-island",
+    "npm:@monotykamary/pi-math"
   ]
 }
