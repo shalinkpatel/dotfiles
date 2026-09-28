@@ -97,3 +97,22 @@ When asked to reply to something:
    what would be sent and where.
 3. Wait for explicit approval before sending. "Go ahead" or "send it" is
    approval; silence, "here's a draft", or a suggested reply is not.
+
+# Mermaid Diagrams in pi
+
+pi's mermaid renderer is stricter than mermaid.live. Rules that render:
+
+- Use `flowchart` only. `quadrantChart`, `mindmap`, and other newer chart
+  types do not render.
+- No text on edges. `A -- label --> B` and `A -->|label| B` both break when
+  the label contains digits, dots, colons, `=`, `|`, `[`, `{`, or `<br/>`
+  (error: `expected a link`). Put the annotation in an intermediate node
+  instead: `A --> note[label] --> B`.
+- One edge per node pair. Two labeled edges between the same nodes fail;
+  branch through separate nodes (`pol --> flag --> dg`, `pol --> block --> dg`).
+- Node labels: plain ASCII. `<br/>` is fine for line breaks. Avoid `→`, `⇄`,
+  `|`, `{}`, `&lt;`, and unbalanced brackets or parens; quote the label
+  (`A["text (with parens)"]`) if punctuation is unavoidable.
+- Chained edges on one line (`a --> b --> c --> d`) are fine.
+- Subgraphs render; keep their titles ASCII too.
+- For math, use `$...$` / `$$...$$` in prose, not inside mermaid labels.
