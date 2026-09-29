@@ -1,6 +1,8 @@
 [user]
 	email = shalin.patel@baseten.co
 	name = Shalin Patel
+[url "git@github.com:basetenlabs/rcli.git"]
+	insteadOf = https://github.com/basetenlabs/rcli.git
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean -- %f
