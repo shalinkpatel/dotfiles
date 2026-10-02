@@ -433,6 +433,24 @@ install_nteract() {
   fi
 }
 
+install_herdr() {
+  # Herdr: terminal workspace manager for AI coding agents (herdr.dev).
+  # Official installer on both Linux and macOS — direct installs use the
+  # stable channel and self-update with `herdr update` (the brew bottle lags
+  # and would shadow ~/.local/bin in PATH). Config (incl. the ctrl+space
+  # prefix) is symlinked from the repo.
+  if command -v herdr >/dev/null 2>&1; then
+    info "herdr already installed: $(herdr --version 2>/dev/null | head -1 || true)"
+  else
+    info "Installing herdr via the official installer"
+    fetch https://herdr.dev/install.sh | sh
+    command -v herdr >/dev/null 2>&1 || { info "WARN: herdr not found after install"; return 1; }
+    info "herdr installed: $(herdr --version 2>/dev/null | head -1 || true)"
+  fi
+  link_path "$DOTFILES_DIR/herdr/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+  herdr server reload-config >/dev/null 2>&1 || true
+}
+
 install_pi() {
   # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
   # is interactive, so install the package directly with npm. pi >= 0.83 needs
@@ -938,6 +956,7 @@ main() {
   install_bun || info "WARN: bun install failed"
   install_hunk || info "WARN: hunk install failed"
   install_nteract || info "WARN: nteract install failed"
+  install_herdr || info "WARN: herdr install failed"
   install_claude || info "WARN: claude install failed"
 
   info ""
