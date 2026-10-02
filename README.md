@@ -64,7 +64,7 @@ AGENTS.md).
 | bun | official installer (bun.sh/install) into `~/.local/opt/bun` |
 | hunk | official installer (hunk.dev/install.sh) into `~/.hunk` |
 | nteract | official installer (sh.nteract.io) into `~/.local/share/nteract` |
-| herdr | official installer (herdr.dev/install.sh); config symlinked (prefix = ctrl+space) |
+| herdr | official installer (herdr.dev/install.sh); config symlinked |
 | fzf, jq, htop, zsh, git | apt (base) |
 
 On macOS the same config files are symlinked; most tool installs are left to
