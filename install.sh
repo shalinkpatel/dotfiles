@@ -452,6 +452,9 @@ install_herdr() {
   # committed config.toml, so setup-keys is not re-run here.
   herdr plugin install --yes furkankly/zoetrope/herdr-plugin >/dev/null 2>&1 || info "WARN: zoetrope plugin install failed"
   herdr plugin install --yes plannotator/herdr-annotate >/dev/null 2>&1 || info "WARN: annotate plugin install failed"
+  # Native pi session ids/state for zoetrope + session restore; writes
+  # ~/.pi/agent/extensions/herdr-agent-state.ts (machine-local, generated).
+  herdr integration install pi >/dev/null 2>&1 || info "WARN: herdr pi integration install failed"
   herdr server reload-config >/dev/null 2>&1 || true
 }
 
