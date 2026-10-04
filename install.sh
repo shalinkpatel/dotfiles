@@ -448,9 +448,17 @@ install_herdr() {
     info "herdr installed: $(herdr --version 2>/dev/null | head -1 || true)"
   fi
   link_path "$DOTFILES_DIR/herdr/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+  # zoe must precede the plugin installs: the plugin's ensure-zoe.sh falls back
+  # to the Homebrew build, which cannot parse pi sessions. The fork's zoe can;
+  # install it when missing or pi-incapable (`zoe --provider pi --version`).
+  if ! command -v zoe >/dev/null 2>&1 || ! zoe --provider pi --version >/dev/null 2>&1; then
+    info "Installing pi-capable zoe from shalinkpatel/zoetrope"
+    cargo install --locked --git https://github.com/shalinkpatel/zoetrope --bin zoe >/dev/null 2>&1 \
+      || info "WARN: zoe install failed (brew install zoetrope is pi-incapable)"
+  fi
   # Community plugins (see README); the zoetrope keybinding ships in the
   # committed config.toml, so setup-keys is not re-run here.
-  herdr plugin install --yes furkankly/zoetrope/herdr-plugin >/dev/null 2>&1 || info "WARN: zoetrope plugin install failed"
+  herdr plugin install --yes shalinkpatel/zoetrope/herdr-plugin >/dev/null 2>&1 || info "WARN: zoetrope plugin install failed"
   herdr plugin install --yes plannotator/herdr-annotate >/dev/null 2>&1 || info "WARN: annotate plugin install failed"
   # Native pi session ids/state for zoetrope + session restore; writes
   # ~/.pi/agent/extensions/herdr-agent-state.ts (machine-local, generated).
