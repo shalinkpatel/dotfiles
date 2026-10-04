@@ -448,6 +448,10 @@ install_herdr() {
     info "herdr installed: $(herdr --version 2>/dev/null | head -1 || true)"
   fi
   link_path "$DOTFILES_DIR/herdr/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+  # Community plugins (see README); the zoetrope keybinding ships in the
+  # committed config.toml, so setup-keys is not re-run here.
+  herdr plugin install --yes furkankly/zoetrope/herdr-plugin >/dev/null 2>&1 || info "WARN: zoetrope plugin install failed"
+  herdr plugin install --yes plannotator/herdr-annotate >/dev/null 2>&1 || info "WARN: annotate plugin install failed"
   herdr server reload-config >/dev/null 2>&1 || true
 }
 
