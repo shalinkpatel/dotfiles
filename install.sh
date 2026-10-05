@@ -397,6 +397,11 @@ install_nteract() {
     info "nteract already installed"
     return 0
   fi
+  # Upstream installer ships Linux x64 binaries only; macOS covers both arches.
+  if [ "$OS" = "Linux" ] && [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "amd64" ]; then
+    info "Skipping nteract on Linux $ARCH (installer is x64 only)"
+    return 0
+  fi
   info "Installing nteract"
   fetch https://sh.nteract.io | bash
   if command -v nteract-mcp >/dev/null 2>&1; then
@@ -427,7 +432,8 @@ install_herdr() {
   # install it when missing or pi-incapable (`zoe --provider pi --version`).
   if ! command -v zoe >/dev/null 2>&1 || ! zoe --provider pi --version >/dev/null 2>&1; then
     info "Installing pi-capable zoe from shalinkpatel/zoetrope"
-    cargo install --locked --git https://github.com/shalinkpatel/zoetrope --bin zoe >/dev/null 2>&1 \
+    # zoetrope: name the crate (the repo now has multiple bins) or cargo refuses.
+    cargo install --locked --git https://github.com/shalinkpatel/zoetrope --bin zoe zoetrope >/dev/null 2>&1 \
       || info "WARN: zoe install failed (brew install zoetrope is pi-incapable)"
   fi
   # Community plugins (see README); the zoetrope keybinding ships in the
@@ -628,8 +634,8 @@ install_erlang() {
 
 install_elixir() {
   # Elixir precompiled zip (elixir-lang/elixir); needs erl on PATH (install_erlang).
-  # macOS: brew install elixir.
-  if command -v elixir >/dev/null 2>&1; then
+  # macOS: brew install elixir. Present-but-broken (wrong OTP pairing) reinstalls.
+  if elixir --version >/dev/null 2>&1; then
     info "elixir already installed: $(elixir --version 2>/dev/null | head -1 || true)"
     return 0
   fi
@@ -637,9 +643,22 @@ install_elixir() {
     info "Skipping elixir install on $OS (use 'brew install elixir')"
     return 0
   fi
-  local version="${ELIXIR_VERSION:-1.20.3}"
+  # Zips are built per OTP major of the erl actually on PATH (not the pin: apt
+  # erlang on aarch64 is OTP 25). 1.20.3 ships otp-27..29; 1.18.3 is the last
+  # release with an otp-25 build.
   local otp_major
-  otp_major="$(echo "${ERLANG_VERSION:-OTP-29.0}" | sed -E 's/OTP-([0-9]+).*/\1/')"
+  otp_major="$(erl -noshell -eval 'io:format("~s",[erlang:system_info(otp_release)]),halt().' 2>/dev/null | tr -d '[:space:]')"
+  if [ -z "$otp_major" ]; then
+    info "WARN: elixir needs erl on PATH (run install_erlang first)"
+    return 1
+  fi
+  local version="${ELIXIR_VERSION:-}"
+  # 1.18.3 is the last release with an otp-25 build: the pin yields to it on
+  # OTP 25 (apt erlang on aarch64); otherwise the pin (or 1.20.3) stands.
+  case "$otp_major" in
+    25) version="1.18.3" ;;
+    *) [ -n "$version" ] || version="1.20.3" ;;
+  esac
   info "Installing elixir $version (otp $otp_major) to ~/.local/opt/elixir"
   mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
   local tmp
@@ -724,7 +743,15 @@ install_babashka() {
   mkdir -p "$HOME/.local/bin"
   local tmp
   tmp="$(mktemp -d)"
-  fetch "https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-${os_asset}-$(go_asset_arch).tar.gz" "$tmp/bb.tar.gz" || { info "WARN: babashka download failed"; rm -rf "$tmp"; return 1; }
+  # Release assets are amd64/aarch64 (go_asset_arch would say arm64/x86_64);
+  # Linux aarch64 ships only the -static build.
+  local arch static=""
+  case "$ARCH" in
+    x86_64 | amd64) arch="amd64" ;;
+    *) arch="aarch64" ;;
+  esac
+  [ "$OS" = "Linux" ] && static="-static"
+  fetch "https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-${os_asset}-${arch}${static}.tar.gz" "$tmp/bb.tar.gz" || { info "WARN: babashka download failed"; rm -rf "$tmp"; return 1; }
   tar -xzf "$tmp/bb.tar.gz" -C "$tmp" bb
   install -m 0755 "$tmp/bb" "$HOME/.local/bin/bb"
   rm -rf "$tmp"
@@ -768,7 +795,13 @@ install_clojure_lsp() {
   mkdir -p "$HOME/.local/bin"
   local tmp
   tmp="$(mktemp -d)"
-  fetch "https://github.com/clojure-lsp/clojure-lsp/releases/download/${version}/clojure-lsp-native-linux-$(go_asset_arch).zip" "$tmp/cl.zip" || { info "WARN: clojure-lsp download failed"; rm -rf "$tmp"; return 1; }
+  # Release assets use aarch64 for arm (go_asset_arch would say arm64).
+  local arch
+  case "$ARCH" in
+    x86_64 | amd64) arch="amd64" ;;
+    *) arch="aarch64" ;;
+  esac
+  fetch "https://github.com/clojure-lsp/clojure-lsp/releases/download/${version}/clojure-lsp-native-linux-${arch}.zip" "$tmp/cl.zip" || { info "WARN: clojure-lsp download failed"; rm -rf "$tmp"; return 1; }
   unzip -q "$tmp/cl.zip" -d "$tmp"
   install -m 0755 "$tmp/clojure-lsp" "$HOME/.local/bin/clojure-lsp"
   rm -rf "$tmp"
