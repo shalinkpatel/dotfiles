@@ -27,7 +27,6 @@ git/           .gitconfig + global ignore
 jj/            jujutsu config
 helix/         editor config + languages
 zed/           zed settings (macOS only)
-et/            etserver config (/etc/et.cfg on Linux)
 pi/            pi (coding agent) settings
 AGENTS.md      user-level agent instructions (harness-independent)
 ```
@@ -52,7 +51,6 @@ AGENTS.md).
 | zmx-picker (`zp`) | GitHub source tarball (shell script; needs fzf + zmx) |
 | helix | GitHub release binary + runtime |
 | fastfetch | GitHub `.deb` |
-| et (Eternal Terminal) | source build (cmake -> `.deb`) |
 | erlang + elixir | precompiled (hex.pm OTP + elixir zip) |
 | clojure | official CLI installer (`--prefix ~/.local`; needs JDK) |
 | babashka | GitHub release binary |
@@ -70,7 +68,6 @@ AGENTS.md).
 On macOS the same config files are symlinked; most tool installs are left to
 Homebrew (cargo builds and Linux binaries are skipped by an OS check). pi and
 its node are installed user-local by `install.sh` just like on Linux.
-Eternal Terminal is `brew install et` on macOS.
 
 ## Pi (coding agent)
 
