@@ -60,7 +60,7 @@ AGENTS.md).
 | uv, ruff, ty | uv installer + `uv tool` |
 | stack-pr | `uv tool` (git) + `gh` extension (`dukebw/gh-stack`) |
 | claude | official installer (claude.ai/install.sh) |
-| pi | npm install via install.sh (`install_pi`); config symlinked |
+| pi | official installer (pi.dev/install.sh, interactive); ~/.pi/agent/bin prepended in .profile; config symlinked |
 | bun | official installer (bun.sh/install) into `~/.local/opt/bun` |
 | hunk | official installer (hunk.dev/install.sh) into `~/.hunk` |
 | nteract | official installer (sh.nteract.io) into `~/.local/share/nteract` |
@@ -74,14 +74,16 @@ Eternal Terminal is `brew install et` on macOS.
 
 ## Pi (coding agent)
 
-`install.sh` installs the pi binary via npm (`install_pi`) and symlinks its
-config into `$HOME`. pi >= 0.83 needs Node >= 22.19 (it uses JSON import
-attributes) and its dependencies (pi-fabric, mcporter) need >= 24, so
-`install_pi` first runs `install_node`, which drops a Node 24 LTS binary from
-nodejs.org into `~/.local/opt/node` (ahead of an old apt or /usr/local node on
-PATH) unless the node on PATH is already new enough (e.g. Homebrew). If the
-system npm's global prefix isn't user-writable, pi installs with
-`--prefix ~/.local`. Everything stays user-local — no sudo.
+`install.sh` installs pi via the official installer (pi.dev/install.sh,
+`install_pi`) and symlinks its config into `$HOME`. The installer is
+interactive and installs into pi's managed dirs — `~/.pi/agent/bin` is
+prepended to PATH in `.profile` — and it migrates any legacy npm-global
+install away itself. `pi update` keeps the binary current. pi >= 0.83
+needs Node >= 22.19 (it uses JSON import attributes) and its dependencies
+(pi-fabric, mcporter) need >= 24, so `install_pi` first runs `install_node`,
+which drops a Node 24 LTS binary from nodejs.org into `~/.local/opt/node`
+(ahead of an old apt or /usr/local node on PATH) unless the node on PATH
+is already new enough (e.g. Homebrew). Everything stays user-local — no sudo.
 
 - `pi/.pi/agent/settings.json` — theme, default provider/model, enabled
   models, thinking level, and the installed-package manifest (`packages`).

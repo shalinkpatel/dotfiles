@@ -6,6 +6,8 @@ alias ls="eza -l"
 # --zsh/--with-shell.
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.asdf/shims:$PATH"
+# pi's managed install (official installer puts the binary here)
+export PATH="$HOME/.pi/agent/bin:$PATH"
 
 # VARS
 export EDITOR="hx"

@@ -467,43 +467,24 @@ install_herdr() {
 }
 
 install_pi() {
-  # Pi (coding agent) is an npm package. The official installer (pi.dev/install.sh)
-  # is interactive, so install the package directly with npm. pi >= 0.83 needs
-  # Node >= 22.19 (import attributes) and its deps need >= 24, so install_node
-  # drops a user-local Node 24 LTS into ~/.local/opt when the node on PATH is
-  # older. When falling back to a system npm whose global prefix isn't
-  # user-writable (e.g. a root-owned /usr/local), install with --prefix
-  # ~/.local so no sudo is ever needed. Idempotent — skips when pi is
-  # already present.
+  # Pi (coding agent) via the official installer (pi.dev/install.sh). The
+  # installer is interactive — it may prompt for a node install and for
+  # migrating a legacy npm-global pi away — and install.sh runs in a
+  # terminal, so those prompts reach the human. It installs into pi's
+  # managed dirs (~/.pi/agent/bin; prepended to PATH in .profile) and
+  # `pi update` keeps it current. install_node still runs first so pi's
+  # Node >= 22.19 / deps >= 24 requirement is met without the prompt.
   if command -v pi >/dev/null 2>&1; then
     info "pi already installed: $(pi --version 2>/dev/null | head -1 || true)"
     return 0
   fi
   install_node || return 1
-  local npm_cmd
-  if [ -x "$HOME/.local/opt/node/bin/npm" ]; then
-    npm_cmd="$HOME/.local/opt/node/bin/npm"
-  elif command -v npm >/dev/null 2>&1; then
-    npm_cmd="npm"
-  else
-    info "npm unavailable; skipping pi install"
-    return 1
-  fi
-  local system_npm_prefix=""
-  if [ "$npm_cmd" = "npm" ]; then
-    system_npm_prefix="$(npm config get prefix 2>/dev/null)"
-  fi
-  info "Installing pi via npm"
-  if [ -n "$system_npm_prefix" ] && [ ! -w "$system_npm_prefix" ]; then
-    info "npm global prefix $system_npm_prefix needs root; installing to ~/.local"
-    "$npm_cmd" install -g --ignore-scripts --prefix "$HOME/.local" @earendil-works/pi-coding-agent || return 1
-  else
-    "$npm_cmd" install -g --ignore-scripts @earendil-works/pi-coding-agent || return 1
-  fi
+  info "Installing pi via the official installer (answer its prompts)"
+  fetch https://pi.dev/install.sh | sh
   if command -v pi >/dev/null 2>&1; then
     info "pi installed: $(pi --version 2>/dev/null | head -1 || true)"
   else
-    info "WARN: pi installed but not on PATH"
+    info "WARN: pi installed but not on PATH (is ~/.pi/agent/bin prepended?)"
   fi
 }
 
