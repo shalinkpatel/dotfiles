@@ -283,7 +283,7 @@ install_claude() {
 
 install_node() {
   # pi (>= 0.83) uses import attributes and needs Node >= 22.19, and its
-  # dependencies (pi-fabric, mcporter) need >= 24. The apt nodejs on Ubuntu
+  # dependencies need >= 24. The apt nodejs on Ubuntu
   # 24.04 is 18.x and can't run pi, and a pkg-installed node on macOS sits
   # root-owned in /usr/local (npm -g needs sudo there), so unless the node
   # on PATH is already new enough (e.g. Homebrew), install a modern Node
@@ -507,13 +507,14 @@ install_golang() {
   rm -rf "$tmp"
 }
 
-install_seek() {
-  # seek (web search + source retrieval for pi: seek_search/seek_fetch/
-  # seek_read) lives in the pi-packages checkout. The shared settings.json
-  # manifest references it as ../../dev/repos/pi-packages/seek/pi (relative
-  # to ~/.pi/agent), so the checkout must be at $HOME/dev/repos/pi-packages.
-  # The Go binary must exist at seek/bin/seek — the adapter starts it on
-  # demand and never builds it.
+install_pi_packages() {
+  # pi-packages (Stelath) holds seek (web search + source retrieval:
+  # seek_search/seek_fetch/seek_read), pi-compaction-b, pi-knowledge,
+  # pi-runner and pi-ri. The shared settings.json manifest references them
+  # as ../../dev/repos/pi-packages/<pkg> (relative to ~/.pi/agent), so the
+  # checkout must be at $HOME/dev/repos/pi-packages. seek needs the Go
+  # binary at seek/bin/seek — the adapter starts it on demand and never
+  # builds it.
   local repo="$HOME/dev/repos/pi-packages"
   if [ ! -d "$repo/.git" ]; then
     mkdir -p "$(dirname "$repo")"
@@ -528,12 +529,18 @@ install_seek() {
   fi
   info "Building seek binary"
   (cd "$repo/seek" && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o bin/seek .) || return 1
+  # pi-runner and pi-ri need node_modules (pi-ri's runtime dep is yaml;
+  # pi-runner's are dev deps for its tests).
+  for d in pi-runner pi-ri; do
+    info "npm install: $repo/$d"
+    (cd "$repo/$d" && npm install) >/dev/null 2>&1 || return 1
+  done
   # pi install writes through the symlinked settings.json; skip when the
   # manifest already lists it (pi also auto-installs manifest entries on
   # startup, so a committed entry + built binary is enough). Do the same for
-  # pi-compaction-b (loads after pi-fabric) and pi-knowledge are pure TS,
+  # pi-compaction-b, pi-knowledge, pi-runner and pi-ri are pure TS,
   # no build step.
-  for pkg in seek/pi pi-compaction-b pi-knowledge; do
+  for pkg in seek/pi pi-compaction-b pi-knowledge pi-runner pi-ri; do
     if pi list 2>/dev/null | grep -q "pi-packages/$pkg"; then
       info "pi package already registered: pi-packages/$pkg"
     else
@@ -898,16 +905,13 @@ main() {
   # Baseten API key is referenced via $BASETEN_API_KEY, which comes from
   # ~/.profile.secret). settings.json also holds the installed-package
   # manifest ("packages"), so pi installs track in git and pi auto-installs
-  # missing packages on startup. mcporter.json feeds pi-fabric's mcp.* surface
-  # (same servers, mcporter schema). auth.json (OAuth tokens/API keys),
+  # missing packages on startup. mcp.json registers pi's native MCP servers
+  # (runlayer-plugin). auth.json (OAuth tokens/API keys),
   # models-store.json (remote model cache) and sessions/ are machine-local
   # and intentionally not linked — see pi/.pi/agent/auth.json.example.
   link_path "$DOTFILES_DIR/pi/.pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
   link_path "$DOTFILES_DIR/pi/.pi/agent/models.json" "$HOME/.pi/agent/models.json"
-  # pi-fabric config; "compaction.engine": "pi" lets pi-compaction-b win
-  # regardless of package load order (fabric also hooks session_before_compact).
-  link_path "$DOTFILES_DIR/pi/.pi/agent/fabric.json" "$HOME/.pi/agent/fabric.json"
-  link_path "$DOTFILES_DIR/pi/.mcporter/mcporter.json" "$HOME/.mcporter/mcporter.json"
+  link_path "$DOTFILES_DIR/pi/.pi/agent/mcp.json" "$HOME/.pi/agent/mcp.json"
 
   # Pi-package configs that live outside the pi package manifest: ponytail
   # reads ~/.config/ponytail/config.json (defaultMode), pi-caveman reads
@@ -962,9 +966,9 @@ main() {
   install_uv_tools || info "WARN: uv tools install failed"
   install_stack_pr || info "WARN: stack-pr install failed"
   install_pi || info "WARN: pi install failed"
-  # seek needs go (toolchain) and pi (adapter registration).
+  # pi-packages: seek needs go (toolchain); everything registers with pi.
   install_golang || info "WARN: go install failed"
-  install_seek || info "WARN: seek install failed"
+  install_pi_packages || info "WARN: pi-packages install failed"
   install_bun || info "WARN: bun install failed"
   install_hunk || info "WARN: hunk install failed"
   install_nteract || info "WARN: nteract install failed"

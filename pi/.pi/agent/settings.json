@@ -17,16 +17,33 @@
   ],
   "defaultThinkingLevel": "high",
   "packages": [
-    "npm:pi-web-access",
-    "npm:pi-fabric",
     "npm:@dietrichgebert/ponytail",
     "git:github.com/shalinkpatel/pi-perf",
     "npm:pi-caveman",
     "git:github.com/shalinkpatel/pi-hunk-island",
-    "npm:@monotykamary/pi-math"
+    "npm:@monotykamary/pi-math",
+    "../../dev/repos/pi-packages/seek/pi",
+    "../../dev/repos/pi-packages/pi-compaction-b",
+    "../../dev/repos/pi-packages/pi-knowledge",
+    "../../dev/repos/pi-packages/pi-runner",
+    "../../dev/repos/pi-packages/pi-ri"
   ],
   "terminal": {
     "imageWidthCells": 120,
     "images": "kitty"
+  },
+  "pi-compaction-b": {
+    "models": [
+      "anthropic/claude-fable-5-1",
+      "anthropic/claude-opus-5-5",
+      "openai-codex/gpt-6.1-sol",
+      "openai-codex/gpt-6-astra",
+      "openai-codex/gpt-6-luna",
+      "baseten/deepseek-ai/DeepSeek-V4-Flash-0731",
+      "baseten/deepseek-ai/DeepSeek-V4.1-Flash",
+      "baseten/moonshotai/Kimi-K3",
+      "baseten/zai-org/GLM-5.3-Fast",
+      "baseten/zai-org/GLM-5.3-Flash"
+    ]
   }
 }
