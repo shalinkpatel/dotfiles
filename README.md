@@ -77,20 +77,18 @@ interactive and installs into pi's managed dirs — `~/.pi/agent/bin` is
 prepended to PATH in `.profile` — and it migrates any legacy npm-global
 install away itself. `pi update` keeps the binary current. pi >= 0.83
 needs Node >= 22.19 (it uses JSON import attributes) and its dependencies
-(pi-fabric, mcporter) need >= 24, so `install_pi` first runs `install_node`,
+need >= 24, so `install_pi` first runs `install_node`,
 which drops a Node 24 LTS binary from nodejs.org into `~/.local/opt/node`
 (ahead of an old apt or /usr/local node on PATH) unless the node on PATH
 is already new enough (e.g. Homebrew). Everything stays user-local — no sudo.
 
 - `pi/.pi/agent/settings.json` — theme, default provider/model, enabled
   models, thinking level, and the installed-package manifest (`packages`).
-- `pi/.pi/agent/fabric.json` — pi-fabric config. `compaction.engine: "pi"`
-  hands compaction to pi-compaction-b regardless of package load order.
 - `pi/.pi/agent/models.json` — custom providers (Baseten). The API key is
   referenced as `$BASETEN_API_KEY`, so it resolves from `~/.profile.secret`
   on each machine; no secrets live in this file.
-- `pi/.mcporter/mcporter.json` — mcporter config backing pi-fabric's `mcp.*`
-  surface (same servers, mcporter schema; symlinked to `~/.mcporter/mcporter.json`).
+- `pi/.pi/agent/mcp.json` — pi's native MCP servers (runlayer-plugin;
+  symlinked to `~/.pi/agent/mcp.json`; sign in with `pi mcp login`).
 
 Machine-local pi state is **not** symlinked or committed: `auth.json`
 (OAuth tokens / API keys), `models-store.json` (remote model metadata cache),
@@ -112,15 +110,23 @@ startup (its resource loader resolves missing packages), so no extra setup is
 needed after `install.sh`.
 - `pi list` shows what's installed; `pi update --extensions` refreshes them.
 
-Keep only `npm:`/`git:` sources in the shared manifest. The one exception is
-`seek` (Stelath/pi-packages): a local-path package whose Go binary has to be
-cloned and built first, so `install.sh` provisions it (`install_golang` +
-`install_seek`) and the manifest entry points at
-`../../dev/repos/pi-packages/seek/pi`,
-`../../dev/repos/pi-packages/pi-compaction-b` (loaded after `pi-fabric`;
-its model allowlist mirrors `enabledModels`), and
-`../../dev/repos/pi-packages/pi-knowledge` (memory + tasks; keyword search
-works out of the box, semantic search needs QMD + `PI_KNOWLEDGE_QMD_INDEX`).
+Keep only `npm:`/`git:` sources in the shared manifest. The exceptions are
+the local-path packages from Stelath/pi-packages, which `install.sh`
+provisions (`install_golang` + `install_pi_packages`: clone, build
+`seek/bin/seek` with Go >= 1.26, `npm install` in pi-runner/pi-ri, register
+each adapter with pi):
+
+- `../../dev/repos/pi-packages/seek/pi` — web search + source retrieval
+- `../../dev/repos/pi-packages/pi-compaction-b` — its model allowlist
+  mirrors `enabledModels`
+- `../../dev/repos/pi-packages/pi-knowledge` — memory + tasks; keyword
+  search works out of the box, semantic search needs QMD +
+  `PI_KNOWLEDGE_QMD_INDEX`
+- `../../dev/repos/pi-packages/pi-runner` — model-native subagent runner
+  (replaced pi-fabric)
+- `../../dev/repos/pi-packages/pi-ri` — autonomous optimization; needs
+  `../pi-runner` in the same checkout
+
 Other local-path packages are
 machine-specific — keep those in project settings (`.pi/settings.json`).
 
@@ -131,18 +137,17 @@ the only form pi advertises to the model; `pi-hunk-island` carries
 `hunk-review`. A bare directory under `~/.pi/agent/skills/` is discovered but
 not advertised, so nothing is linked there.
 
-### MCP servers (mcporter)
+### MCP servers
 
-MCP servers are provided by mcporter, which backs pi-fabric's `mcp.*` surface
-inside `fabric_exec` programs. The shared server config is
-`pi/.mcporter/mcporter.json` (symlinked to `~/.mcporter/mcporter.json`).
+MCP servers are pi-native (`/mcp`, `pi mcp`). The shared config is
+`pi/.pi/agent/mcp.json` (symlinked to `~/.pi/agent/mcp.json`).
 
 The only server is **`runlayer-plugin`**, Runlayer's unified plugin proxy at
 `https://baseten.runlayer.com/mcp` — it fronts the workspace's connected apps
 (Slack, Gmail, Drive, and the rest) behind `search_tools` / `execute_tool`, so
 one server replaces a per-app list. The file sets `"imports": []` deliberately
-so `runlayer-plugin` is pi's only MCP server; mcporter would otherwise merge
-servers from host configs (Codex, Claude Code, Claude Desktop, and others).
+so `runlayer-plugin` is pi's only MCP server; pi would otherwise pick up
+servers from other configs (Codex, Claude Code, Claude Desktop, and others).
 
 No OAuth entry is needed for this endpoint. (The previous `runlayer` entry —
 the workspace admin API behind `.../api/v1/proxy/<uuid>/mcp` — was removed;
