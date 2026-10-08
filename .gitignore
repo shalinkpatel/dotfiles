@@ -19,3 +19,4 @@ pi/.pi/agent/sessions/
 # Erlang crash dumps (erl_crash.dump) dropped by the erlang install
 erl_crash.dump
 .pi/fabric/
+.pi/fabric/
