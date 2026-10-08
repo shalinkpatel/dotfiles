@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.4",
+  "lastChangelogVersion": "1.1.0",
   "theme": "dark",
   "defaultProvider": "baseten",
   "defaultModel": "deepseek-ai/DeepSeek-V4-Flash-0731",
@@ -26,6 +26,7 @@
     "npm:@monotykamary/pi-math"
   ],
   "terminal": {
-    "imageWidthCells": 120
+    "imageWidthCells": 120,
+    "images": "kitty"
   }
 }
