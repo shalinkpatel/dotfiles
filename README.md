@@ -84,13 +84,13 @@ is already new enough (e.g. Homebrew). Everything stays user-local — no sudo.
 
 - `pi/.pi/agent/settings.json` — theme, default provider/model, enabled
   models, thinking level, and the installed-package manifest (`packages`).
+- `pi/.pi/agent/fabric.json` — pi-fabric config. `compaction.engine: "pi"`
+  hands compaction to pi-compaction-b regardless of package load order.
 - `pi/.pi/agent/models.json` — custom providers (Baseten). The API key is
   referenced as `$BASETEN_API_KEY`, so it resolves from `~/.profile.secret`
   on each machine; no secrets live in this file.
 - `pi/.mcporter/mcporter.json` — mcporter config backing pi-fabric's `mcp.*`
   surface (same servers, mcporter schema; symlinked to `~/.mcporter/mcporter.json`).
-- `pi/.pi/web-search.json` — web-search defaults: search provider and the
-  curator workflow (`summary-review`, `auto-summary`, or `none`).
 
 Machine-local pi state is **not** symlinked or committed: `auth.json`
 (OAuth tokens / API keys), `models-store.json` (remote model metadata cache),
@@ -112,9 +112,17 @@ startup (its resource loader resolves missing packages), so no extra setup is
 needed after `install.sh`.
 - `pi list` shows what's installed; `pi update --extensions` refreshes them.
 
-Keep only `npm:`/`git:` sources in the shared manifest. Local-path packages
-are stored relative to `~/.pi/agent` and are machine-specific — keep those
-in project settings (`.pi/settings.json`) instead.
+Keep only `npm:`/`git:` sources in the shared manifest. The one exception is
+`seek` (Stelath/pi-packages): a local-path package whose Go binary has to be
+cloned and built first, so `install.sh` provisions it (`install_golang` +
+`install_seek`) and the manifest entry points at
+`../../dev/repos/pi-packages/seek/pi`,
+`../../dev/repos/pi-packages/pi-compaction-b` (loaded after `pi-fabric`;
+its model allowlist mirrors `enabledModels`), and
+`../../dev/repos/pi-packages/pi-knowledge` (memory + tasks; keyword search
+works out of the box, semantic search needs QMD + `PI_KNOWLEDGE_QMD_INDEX`).
+Other local-path packages are
+machine-specific — keep those in project settings (`.pi/settings.json`).
 
 ### Pi skills
 

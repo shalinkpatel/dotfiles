@@ -468,6 +468,83 @@ install_pi() {
   fi
 }
 
+install_golang() {
+  # Go toolchain for building seek (pi-packages/seek needs Go >= 1.26; apt
+  # ships older versions and Homebrew isn't used on the pods). Official
+  # tarball into ~/.local/opt/go, bins symlinked into ~/.local/bin (already
+  # on PATH via .profile).
+  if command -v go >/dev/null 2>&1; then
+    local cur
+    cur="$(go env GOVERSION 2>/dev/null | sed 's/^go//')"
+    if [ -n "$cur" ] && [ "$(printf '%s\n' "$cur" 1.26 | sort -V | head -1)" = "1.26" ]; then
+      info "go $cur is new enough for seek"
+      return 0
+    fi
+    info "go ${cur:-unknown} is too old for seek; installing modern go"
+  fi
+  local version go_os go_arch
+  case "$OS" in
+    Linux) go_os="linux" ;;
+    Darwin) go_os="darwin" ;;
+    *) info "Skipping go install on $OS"; return 1 ;;
+  esac
+  go_arch="$(go_asset_arch)"
+  version="$(fetch 'https://go.dev/VERSION?m=text' | head -1 | sed 's/^go//')"
+  if [ -z "$version" ]; then
+    info "Could not resolve latest go version"
+    return 1
+  fi
+  info "Installing go $version to ~/.local/opt/go"
+  mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  fetch "https://go.dev/dl/go${version}.${go_os}-${go_arch}.tar.gz" "$tmp/go.tar.gz"
+  tar -xzf "$tmp/go.tar.gz" -C "$tmp"
+  rm -rf "$HOME/.local/opt/go"
+  mv "$tmp/go" "$HOME/.local/opt/go"
+  ln -sfn "$HOME/.local/opt/go/bin/go" "$HOME/.local/bin/go"
+  ln -sfn "$HOME/.local/opt/go/bin/gofmt" "$HOME/.local/bin/gofmt"
+  rm -rf "$tmp"
+}
+
+install_seek() {
+  # seek (web search + source retrieval for pi: seek_search/seek_fetch/
+  # seek_read) lives in the pi-packages checkout. The shared settings.json
+  # manifest references it as ../../dev/repos/pi-packages/seek/pi (relative
+  # to ~/.pi/agent), so the checkout must be at $HOME/dev/repos/pi-packages.
+  # The Go binary must exist at seek/bin/seek — the adapter starts it on
+  # demand and never builds it.
+  local repo="$HOME/dev/repos/pi-packages"
+  if [ ! -d "$repo/.git" ]; then
+    mkdir -p "$(dirname "$repo")"
+    info "Cloning Stelath/pi-packages to $repo"
+    git clone https://github.com/Stelath/pi-packages "$repo" || return 1
+  else
+    info "pi-packages already cloned at $repo"
+  fi
+  if ! command -v go >/dev/null 2>&1; then
+    info "go unavailable; cannot build seek"
+    return 1
+  fi
+  info "Building seek binary"
+  (cd "$repo/seek" && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o bin/seek .) || return 1
+  # pi install writes through the symlinked settings.json; skip when the
+  # manifest already lists it (pi also auto-installs manifest entries on
+  # startup, so a committed entry + built binary is enough). Do the same for
+  # pi-compaction-b (loads after pi-fabric) and pi-knowledge are pure TS,
+  # no build step.
+  for pkg in seek/pi pi-compaction-b pi-knowledge; do
+    if pi list 2>/dev/null | grep -q "pi-packages/$pkg"; then
+      info "pi package already registered: pi-packages/$pkg"
+    else
+      pi install "$repo/$pkg" || return 1
+    fi
+  done
+  "$repo/seek/bin/seek" --help >/dev/null 2>&1 \
+    && info "seek binary ok: $repo/seek/bin/seek" \
+    || info "WARN: seek binary failed smoke test"
+}
+
 install_fzf() {
   # The apt build of fzf is too old for --zsh/--bash and for zp's
   # --with-shell, so install a modern release binary on Linux. It lands in
@@ -822,13 +899,14 @@ main() {
   # ~/.profile.secret). settings.json also holds the installed-package
   # manifest ("packages"), so pi installs track in git and pi auto-installs
   # missing packages on startup. mcporter.json feeds pi-fabric's mcp.* surface
-  # (same servers, mcporter schema). web-search.json is the pi web-search
-  # default (provider + curator workflow). auth.json (OAuth tokens/API keys),
+  # (same servers, mcporter schema). auth.json (OAuth tokens/API keys),
   # models-store.json (remote model cache) and sessions/ are machine-local
   # and intentionally not linked — see pi/.pi/agent/auth.json.example.
   link_path "$DOTFILES_DIR/pi/.pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
   link_path "$DOTFILES_DIR/pi/.pi/agent/models.json" "$HOME/.pi/agent/models.json"
-  link_path "$DOTFILES_DIR/pi/.pi/web-search.json" "$HOME/.pi/web-search.json"
+  # pi-fabric config; "compaction.engine": "pi" lets pi-compaction-b win
+  # regardless of package load order (fabric also hooks session_before_compact).
+  link_path "$DOTFILES_DIR/pi/.pi/agent/fabric.json" "$HOME/.pi/agent/fabric.json"
   link_path "$DOTFILES_DIR/pi/.mcporter/mcporter.json" "$HOME/.mcporter/mcporter.json"
 
   # Pi-package configs that live outside the pi package manifest: ponytail
@@ -884,6 +962,9 @@ main() {
   install_uv_tools || info "WARN: uv tools install failed"
   install_stack_pr || info "WARN: stack-pr install failed"
   install_pi || info "WARN: pi install failed"
+  # seek needs go (toolchain) and pi (adapter registration).
+  install_golang || info "WARN: go install failed"
+  install_seek || info "WARN: seek install failed"
   install_bun || info "WARN: bun install failed"
   install_hunk || info "WARN: hunk install failed"
   install_nteract || info "WARN: nteract install failed"
