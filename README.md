@@ -113,8 +113,8 @@ needed after `install.sh`.
 Keep only `npm:`/`git:` sources in the shared manifest. The exceptions are
 the local-path packages from Stelath/pi-packages, which `install.sh`
 provisions (`install_golang` + `install_pi_packages`: clone, build
-`seek/bin/seek` with Go >= 1.26, `npm install` in pi-runner/pi-ri, register
-each adapter with pi):
+`seek/bin/seek` with Go >= 1.26, npm install + tsc build of the
+pi-permissions <- pi-runner <- pi-ri chain, register each adapter with pi):
 
 - `../../dev/repos/pi-packages/seek/pi` — web search + source retrieval
 - `../../dev/repos/pi-packages/pi-compaction-b` — its model allowlist
@@ -122,10 +122,20 @@ each adapter with pi):
 - `../../dev/repos/pi-packages/pi-knowledge` — memory + tasks; keyword
   search works out of the box, semantic search needs QMD +
   `PI_KNOWLEDGE_QMD_INDEX`
+- `../../dev/repos/pi-packages/pi-permissions` — sandboxed execution +
+  permission review for `bash`/`python`; pi-runner's permission runtime
 - `../../dev/repos/pi-packages/pi-runner` — model-native subagent runner
-  (replaced pi-fabric)
+  (replaced pi-fabric); builds against `../pi-permissions`
 - `../../dev/repos/pi-packages/pi-ri` — autonomous optimization; needs
   `../pi-runner` in the same checkout
+- `../../dev/repos/pi-packages/pi-auto-name` — names chats/tabs with one
+  model request (automatic naming off by default; `/auto-name` manual)
+- `../../dev/repos/pi-packages/pi-herdr` — `/fork` and `/clone` open new
+  Herdr tabs; no-op outside Herdr
+
+pi-perf is installed directly (`git:github.com/shalinkpatel/pi-perf`) and
+pinned in the repo as a submodule. patchwork is a submodule too but is a
+private repo — not installed here.
 
 Other local-path packages are
 machine-specific — keep those in project settings (`.pi/settings.json`).
