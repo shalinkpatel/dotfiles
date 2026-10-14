@@ -24,3 +24,14 @@ fi
 if command -v fastfetch >/dev/null 2>&1 && [[ -o interactive ]]; then
   fastfetch
 fi
+
+# HERDR — plugin keybindings (annotate etc.) are defined server-side; a plain
+# --remote attach defaults to local keys and silently drops them. Inject
+# --remote-keybindings server unless the caller already chose a mode.
+herdr() {
+  case "$*" in
+    *--remote-keybindings*) command herdr "$@" ;;
+    *--remote*) command herdr --remote-keybindings server "$@" ;;
+    *) command herdr "$@" ;;
+  esac
+}
