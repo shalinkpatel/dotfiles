@@ -26,7 +26,10 @@
     "../../dev/repos/pi-packages/pi-compaction-b",
     "../../dev/repos/pi-packages/pi-knowledge",
     "../../dev/repos/pi-packages/pi-runner",
-    "../../dev/repos/pi-packages/pi-ri"
+    "../../dev/repos/pi-packages/pi-ri",
+    "../../dev/repos/pi-packages/pi-permissions",
+    "../../dev/repos/pi-packages/pi-auto-name",
+    "../../dev/repos/pi-packages/pi-herdr"
   ],
   "terminal": {
     "imageWidthCells": 120,
