@@ -529,18 +529,18 @@ install_pi_packages() {
   fi
   info "Building seek binary"
   (cd "$repo/seek" && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o bin/seek .) || return 1
-  # pi-runner and pi-ri need node_modules (pi-ri's runtime dep is yaml;
-  # pi-runner's are dev deps for its tests).
-  for d in pi-runner pi-ri; do
-    info "npm install: $repo/$d"
-    (cd "$repo/$d" && npm install) >/dev/null 2>&1 || return 1
+  # pi-permissions <- pi-runner <- pi-ri: npm install + tsc build in that
+  # order. pi-runner and pi-ri depend on the built pi-permissions (and pi-ri
+  # on the built pi-runner) via file: links; pi-ri's runtime dep is yaml.
+  for d in pi-permissions pi-runner pi-ri; do
+    info "npm install + build: $repo/$d"
+    (cd "$repo/$d" && npm install >/dev/null 2>&1 && npm run build >/dev/null 2>&1) || return 1
   done
   # pi install writes through the symlinked settings.json; skip when the
   # manifest already lists it (pi also auto-installs manifest entries on
   # startup, so a committed entry + built binary is enough). Do the same for
-  # pi-compaction-b, pi-knowledge, pi-runner and pi-ri are pure TS,
-  # no build step.
-  for pkg in seek/pi pi-compaction-b pi-knowledge pi-runner pi-ri; do
+  # the rest are pure TS, no build step.
+  for pkg in seek/pi pi-compaction-b pi-knowledge pi-permissions pi-auto-name pi-herdr pi-runner pi-ri; do
     if pi list 2>/dev/null | grep -q "pi-packages/$pkg"; then
       info "pi package already registered: pi-packages/$pkg"
     else
