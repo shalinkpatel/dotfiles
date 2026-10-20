@@ -29,3 +29,7 @@ fi
 if command -v fastfetch >/dev/null 2>&1; then
   fastfetch
 fi
+
+# >>> agterm agent-status >>>
+source '/Users/shalin.patel/.config/agterm/agent-status/shell/integration.sh'
+# <<< agterm agent-status <<<
