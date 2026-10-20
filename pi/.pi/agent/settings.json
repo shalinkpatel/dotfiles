@@ -1,21 +1,24 @@
 {
-  "lastChangelogVersion": "1.1.0",
-  "theme": "dark",
-  "defaultProvider": "baseten",
-  "defaultModel": "deepseek-ai/DeepSeek-V4-Flash-0731",
-  "enabledModels": [
-    "anthropic/claude-fable-5-1",
-    "anthropic/claude-opus-5-5",
-    "openai-codex/gpt-6.1-sol",
-    "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6-luna",
-    "baseten/deepseek-ai/DeepSeek-V4-Flash-0731",
-    "baseten/deepseek-ai/DeepSeek-V4.1-Flash",
-    "baseten/moonshotai/Kimi-K3",
-    "baseten/zai-org/GLM-5.3-Fast",
-    "baseten/zai-org/GLM-5.3-Flash"
-  ],
+  "defaultModel": "b10-internal/auto-XP9WlBD",
+  "defaultProvider": "baseten-harness",
   "defaultThinkingLevel": "high",
+  "enabledModels": [
+    "baseten-harness/b10-internal/auto-pP8LrPn",
+    "baseten-harness/b10-internal/auto-XP9WlBD",
+    "baseten-harness/b10-internal/baseten-GLM-5.3-Flash",
+    "baseten-harness/b10-internal/baseten-GLM-5.3-Fast",
+    "baseten-harness/b10-internal/openai-gpt-6.1-sol",
+    "baseten-harness/b10-internal/anthropic-claude-fable-5-1",
+    "baseten-harness/b10-internal/anthropic-claude-opus-5-5",
+    "baseten-harness/b10-internal/openai-gpt-6-luna",
+    "baseten-harness/b10-internal/openai-gpt-6-astra",
+    "baseten-harness/b10-internal/baseten-Kimi-K3",
+    "baseten-harness/b10-internal/baseten-GLM-5.3",
+    "baseten-harness/b10-internal/baseten-DeepSeek-V4.1-Flash",
+    "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017-Fast",
+    "anthropic/claude-opus-5-5"
+  ],
+  "lastChangelogVersion": "1.3.0",
   "packages": [
     "npm:@dietrichgebert/ponytail",
     "git:github.com/shalinkpatel/pi-perf",
@@ -31,22 +34,27 @@
     "../../dev/repos/pi-packages/pi-auto-name",
     "../../dev/repos/pi-packages/pi-herdr"
   ],
+  "pi-compaction-b": {
+    "models": [
+      "baseten-harness/b10-internal/auto-pP8LrPn",
+      "baseten-harness/b10-internal/auto-XP9WlBD",
+      "baseten-harness/b10-internal/baseten-GLM-5.3-Flash",
+      "baseten-harness/b10-internal/baseten-GLM-5.3-Fast",
+      "baseten-harness/b10-internal/openai-gpt-6.1-sol",
+      "baseten-harness/b10-internal/anthropic-claude-fable-5-1",
+      "baseten-harness/b10-internal/anthropic-claude-opus-5-5",
+      "baseten-harness/b10-internal/openai-gpt-6-luna",
+      "baseten-harness/b10-internal/openai-gpt-6-astra",
+      "baseten-harness/b10-internal/baseten-Kimi-K3",
+      "baseten-harness/b10-internal/baseten-GLM-5.3",
+      "baseten-harness/b10-internal/baseten-DeepSeek-V4.1-Flash",
+      "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017-Fast",
+      "anthropic/claude-opus-5-5"
+    ]
+  },
   "terminal": {
     "imageWidthCells": 120,
     "images": "kitty"
   },
-  "pi-compaction-b": {
-    "models": [
-      "anthropic/claude-fable-5-1",
-      "anthropic/claude-opus-5-5",
-      "openai-codex/gpt-6.1-sol",
-      "openai-codex/gpt-6-astra",
-      "openai-codex/gpt-6-luna",
-      "baseten/deepseek-ai/DeepSeek-V4-Flash-0731",
-      "baseten/deepseek-ai/DeepSeek-V4.1-Flash",
-      "baseten/moonshotai/Kimi-K3",
-      "baseten/zai-org/GLM-5.3-Fast",
-      "baseten/zai-org/GLM-5.3-Flash"
-    ]
-  }
+  "theme": "system"
 }
