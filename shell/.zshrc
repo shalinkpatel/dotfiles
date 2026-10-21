@@ -36,6 +36,3 @@ herdr() {
   esac
 }
 
-# >>> agterm agent-status >>>
-source '/Users/shalin.patel/.config/agterm/agent-status/shell/integration.sh'
-# <<< agterm agent-status <<<
