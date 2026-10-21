@@ -1,6 +1,6 @@
 {
-  "defaultModel": "b10-internal/auto-XP9WlBD",
-  "defaultProvider": "baseten-harness",
+  "defaultModel": "deepseek-ai/DeepSeek-V4.1-Flash-1017-Fast",
+  "defaultProvider": "baseten",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "baseten-harness/b10-internal/auto-pP8LrPn",
