@@ -252,6 +252,40 @@
           "maxTokens": 16384,
           "name": "GLM 5.2 Fast",
           "reasoning": true
+        },
+        {
+          "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          "name": "DeepSeek V4.1 Flash 1017",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 16384,
+          "cost": {
+            "input": 0.3,
+            "output": 1.2,
+            "cacheRead": 0.007,
+            "cacheWrite": 0
+          }
+        },
+        {
+          "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017-Fast",
+          "name": "DeepSeek V4.1 Flash 1017 Fast",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 16384,
+          "cost": {
+            "input": 0.6,
+            "output": 2.4,
+            "cacheRead": 0.014,
+            "cacheWrite": 0
+          }
         }
       ],
       "name": "Baseten"
@@ -275,7 +309,7 @@
             "supportsStore": false,
             "supportsStrictMode": true
           },
-          "contextWindow": 1000000,
+          "contextWindow": 8192,
           "id": "b10-internal/auto-pP8LrPn",
           "input": [
             "text",
@@ -304,7 +338,7 @@
             "supportsStore": false,
             "supportsStrictMode": true
           },
-          "contextWindow": 1000000,
+          "contextWindow": 8192,
           "id": "b10-internal/auto-XP9WlBD",
           "input": [
             "text",
