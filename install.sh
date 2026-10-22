@@ -281,6 +281,39 @@ install_claude() {
   fi
 }
 
+install_baseten() {
+  # Baseten CLI. pi's baseten-harness provider and the deploy/ssh workflows
+  # both call it; 1.5.0 is the pinned floor. Homebrew (macOS and Linux) is the
+  # vendor's own channel; anything older is upgraded rather than left in place.
+  local want="1.5.0"
+  if command -v baseten >/dev/null 2>&1; then
+    local cur
+    cur="$(baseten --version 2>/dev/null | awk '{print $1}' | sed 's/^v//')"
+    if [ -n "$cur" ] && [ "$(printf '%s\n' "$cur" "$want" | sort -V | tail -1)" = "$cur" ]; then
+      info "baseten $cur is new enough"
+      return 0
+    fi
+    info "baseten is older than $want; upgrading"
+  fi
+  if ! command -v brew >/dev/null 2>&1; then
+    info "Homebrew unavailable; install the baseten CLI $want manually (brew install baseten)"
+    return 1
+  fi
+  info "Installing baseten CLI $want via Homebrew"
+  brew tap basetenlabs/baseten >/dev/null 2>&1 || true
+  if command -v baseten >/dev/null 2>&1; then
+    brew upgrade baseten >/dev/null 2>&1 || brew install baseten >/dev/null 2>&1 || true
+  else
+    brew install baseten >/dev/null 2>&1 || true
+  fi
+  if command -v baseten >/dev/null 2>&1; then
+    info "baseten installed: $(baseten --version 2>/dev/null | head -1)"
+  else
+    info "WARN: baseten CLI install failed"
+    return 1
+  fi
+}
+
 install_node() {
   # pi (>= 0.83) uses import attributes and needs Node >= 22.19, and its
   # dependencies need >= 24. The apt nodejs on Ubuntu
@@ -976,6 +1009,7 @@ main() {
   install_nteract || info "WARN: nteract install failed"
   install_herdr || info "WARN: herdr install failed"
   install_claude || info "WARN: claude install failed"
+  install_baseten || info "WARN: baseten CLI install failed"
 
   info ""
   info "Install complete."

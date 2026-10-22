@@ -477,6 +477,9 @@
             "minimal": null,
             "off": null,
             "xhigh": "xhigh"
+          },
+          "compat": {
+            "forceAdaptiveThinking": true
           }
         },
         {
@@ -505,6 +508,9 @@
             "minimal": null,
             "off": null,
             "xhigh": "xhigh"
+          },
+          "compat": {
+            "forceAdaptiveThinking": true
           }
         },
         {
