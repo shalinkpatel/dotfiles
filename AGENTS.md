@@ -98,6 +98,13 @@ When asked to reply to something:
 3. Wait for explicit approval before sending. "Go ahead" or "send it" is
    approval; silence, "here's a draft", or a suggested reply is not.
 
+# Times and Time Zones
+
+Show times to Shalin in Pacific time (PST/PDT, `America/Los_Angeles`) by default,
+labeled with the zone (e.g. `9:45 PM PST`). When the source is UTC (logs,
+Prometheus, S3 keys, commands that take UTC), give the UTC value too, e.g.
+`11:30 PM PST (07:30Z)`. Keep UTC in commands, code and filenames.
+
 # Mermaid Diagrams in pi
 
 pi renders mermaid blocks with `grok-mermaid` (Unicode box art) and silently

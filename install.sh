@@ -396,31 +396,6 @@ install_bun() {
   fi
 }
 
-install_hunk() {
-  # Hunk: review-first terminal diff viewer for agent-authored changesets.
-  # Official installer puts the binary in ~/.hunk/bin; use --no-modify-path so
-  # it doesn't touch the symlinked shell rc files, and symlink into
-  # ~/.local/bin (already on PATH via .profile). On macOS this is
-  # `brew install hunk`.
-  if command -v hunk >/dev/null 2>&1; then
-    info "hunk already installed: $(hunk --version 2>/dev/null || true)"
-    return 0
-  fi
-  if [ "$OS" != "Linux" ]; then
-    info "Skipping hunk install on $OS (use 'brew install hunk')"
-    return 0
-  fi
-  info "Installing hunk to ~/.hunk"
-  fetch https://hunk.dev/install.sh | sh -s -- --no-modify-path
-  if [ -x "$HOME/.hunk/bin/hunk" ]; then
-    ln -sfn "$HOME/.hunk/bin/hunk" "$HOME/.local/bin/hunk"
-    info "hunk installed: $(hunk --version 2>/dev/null || true)"
-  else
-    info "WARN: hunk not found after install"
-    return 1
-  fi
-}
-
 install_nteract() {
   # nteract: notebook/code editor (AppImage on Linux, .app on macOS) plus
   # runt/runtimed/nteract-mcp sidecars. Official installer (sh.nteract.io)
@@ -978,6 +953,7 @@ main() {
     compile_tool jj-cli jj
     compile_tool numbat-cli numbat
     compile_tool markless
+    compile_tool tuicr
   else
     info "SKIP_CARGO=1: skipping cargo builds"
   fi
@@ -1005,7 +981,6 @@ main() {
   install_golang || info "WARN: go install failed"
   install_pi_packages || info "WARN: pi-packages install failed"
   install_bun || info "WARN: bun install failed"
-  install_hunk || info "WARN: hunk install failed"
   install_nteract || info "WARN: nteract install failed"
   install_herdr || info "WARN: herdr install failed"
   install_claude || info "WARN: claude install failed"

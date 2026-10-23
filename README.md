@@ -45,7 +45,7 @@ AGENTS.md).
 
 | Tool | Source on pod |
 |---|---|
-| eza, zoxide, starship, ripgrep, fd, just, jj, numbat, markless | compiled via cargo (full opts) |
+| eza, zoxide, starship, ripgrep, fd, just, jj, numbat, markless, tuicr | compiled via cargo (full opts) |
 | zmx | GitHub release binary |
 | jjui | GitHub release binary (TUI for jj) |
 | zmx-picker (`zp`) | GitHub source tarball (shell script; needs fzf + zmx) |
@@ -60,7 +60,6 @@ AGENTS.md).
 | claude | official installer (claude.ai/install.sh) |
 | pi | official installer (pi.dev/install.sh, interactive); ~/.pi/agent/bin prepended in .profile; config symlinked |
 | bun | official installer (bun.sh/install) into `~/.local/opt/bun` |
-| hunk | official installer (hunk.dev/install.sh) into `~/.hunk` |
 | nteract | official installer (sh.nteract.io) into `~/.local/share/nteract` |
 | herdr | official installer (herdr.dev/install.sh); config symlinked; plugins: shalinkpatel/zoetrope (pi-capable fork of furkankly/zoetrope), plannotator/herdr-annotate (full); pi-capable zoe built via cargo from the fork |
 | fzf, jq, htop, zsh, git | apt (base) |
@@ -143,9 +142,9 @@ machine-specific — keep those in project settings (`.pi/settings.json`).
 ### Pi skills
 
 Skills ship inside pi packages (`pi.skills` in a package manifest), which is
-the only form pi advertises to the model; `pi-hunk-island` carries
-`hunk-review`. A bare directory under `~/.pi/agent/skills/` is discovered but
-not advertised, so nothing is linked there.
+the only form pi advertises to the model. A bare directory under
+`~/.pi/agent/skills/` is discovered but not advertised, so nothing is linked
+there.
 
 ### MCP servers
 
