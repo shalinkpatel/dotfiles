@@ -100,19 +100,31 @@ When asked to reply to something:
 
 # Mermaid Diagrams in pi
 
-pi's mermaid renderer is stricter than mermaid.live. Rules that render:
+pi renders mermaid blocks with `grok-mermaid` (Unicode box art) and silently
+shows the raw source instead when it cannot. Verified against pi 1.4.0 /
+grok-mermaid 0.2.3:
 
-- Use `flowchart` only. `quadrantChart`, `mindmap`, and other newer chart
-  types do not render.
-- No text on edges. `A -- label --> B` and `A -->|label| B` both break when
-  the label contains digits, dots, colons, `=`, `|`, `[`, `{`, or `<br/>`
-  (error: `expected a link`). Put the annotation in an intermediate node
-  instead: `A --> note[label] --> B`.
-- One edge per node pair. Two labeled edges between the same nodes fail;
-  branch through separate nodes (`pol --> flag --> dg`, `pol --> block --> dg`).
-- Node labels: plain ASCII. `<br/>` is fine for line breaks. Avoid `→`, `⇄`,
-  `|`, `{}`, `&lt;`, and unbalanced brackets or parens; quote the label
-  (`A["text (with parens)"]`) if punctuation is unavoidable.
-- Chained edges on one line (`a --> b --> c --> d`) are fine.
-- Subgraphs render; keep their titles ASCII too.
+- **Width is the usual failure.** A diagram wider than the chat pane falls
+  back to raw source with no warning. `flowchart LR` grows wide fast (a 6-node
+  LR chain is ~125 columns; a 16-node LR graph was ~300) while the same graph
+  as `flowchart TD` was 70. Default to `TD`, keep diagrams under ~100 columns,
+  and split a big diagram into two small ones rather than one wide one.
+- Avoid cycles and back-edges (`b --> a` after `a --> b`): they render but
+  route as tangled bundles of lines. Point the edge at a separate node instead
+  (`ev[KV events back to router]`).
+- Supported: `flowchart`/`graph` (with subgraphs, `{}` decision nodes, edge
+  labels), `sequenceDiagram`, `stateDiagram`, `classDiagram`, `erDiagram`.
+  Not supported (raw source shown): `mindmap`, `quadrantChart`, `gantt`, `pie`.
+- Parse problems show as `Mermaid diagram not rendered: <reason>` under the
+  source. Known breaker: HTML entities in labels (`&lt;`) end the label early.
+- Rendering is skipped while streaming and in thinking blocks; judge the
+  final message.
 - For math, use `$...$` / `$$...$$` in prose, not inside mermaid labels.
+
+Check a diagram before sending (prints its width and any warnings; `no
+diagram` means unsupported type):
+
+```bash
+G=$(ls -d ~/.pi/agent/install/releases/*/node_modules/grok-mermaid | sort -V | tail -1)
+node --input-type=module -e "import {render} from '$G/dist/index.js'; import fs from 'fs'; const a = render(fs.readFileSync(0, 'utf8')); console.log(a ? 'width ' + a.width + ' warnings ' + JSON.stringify(a.warnings) : 'no diagram')" < diagram.mmd
+```
