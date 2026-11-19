@@ -254,69 +254,198 @@
           "reasoning": true
         },
         {
+          "contextWindow": 1048576,
+          "cost": {
+            "cacheRead": 0.007,
+            "cacheWrite": 0,
+            "input": 0.3,
+            "output": 1.2
+          },
           "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
-          "name": "DeepSeek V4.1 Flash 1017",
-          "reasoning": true,
           "input": [
             "text",
             "image"
           ],
-          "contextWindow": 1048576,
           "maxTokens": 16384,
-          "cost": {
-            "input": 0.3,
-            "output": 1.2,
-            "cacheRead": 0.007,
-            "cacheWrite": 0
-          }
+          "name": "DeepSeek V4.1 Flash 1017",
+          "reasoning": true
         },
         {
+          "contextWindow": 1048576,
+          "cost": {
+            "cacheRead": 0.014,
+            "cacheWrite": 0,
+            "input": 0.6,
+            "output": 2.4
+          },
           "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017-Fast",
-          "name": "DeepSeek V4.1 Flash 1017 Fast",
-          "reasoning": true,
           "input": [
             "text",
             "image"
           ],
-          "contextWindow": 1048576,
           "maxTokens": 16384,
-          "cost": {
-            "input": 0.6,
-            "output": 2.4,
-            "cacheRead": 0.014,
-            "cacheWrite": 0
-          }
+          "name": "DeepSeek V4.1 Flash 1017 Fast",
+          "reasoning": true
         }
       ],
       "name": "Baseten"
     },
     "baseten-harness": {
       "api": "openai-completions",
-      "apiKey": "$BASETEN_HARNESS_API_KEY",
+      "apiKey": "!'/Users/shalin.patel/.local/bin/baseten' grid token --harness pi --profile 'prod-internal-coding'",
       "authHeader": true,
       "baseUrl": "https://coding.baseten.co/v1",
       "headers": {
-        "X-Baseten-Client": "pi"
+        "X-Baseten-Grid-Client": "pi"
       },
       "models": [
+        {
+          "api": "openai-responses",
+          "contextWindow": 1050000,
+          "cost": {
+            "cacheRead": 0.4,
+            "cacheWrite": 10,
+            "input": 8,
+            "output": 40,
+            "tiers": [
+              {
+                "cacheRead": 0.8,
+                "cacheWrite": 20,
+                "input": 16,
+                "inputTokensAbove": 200000,
+                "output": 60
+              }
+            ]
+          },
+          "id": "openai/gpt-6-2-astra--openai",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 128000,
+          "name": "GPT-6.2 Astra",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": "medium",
+            "minimal": null,
+            "off": null,
+            "xhigh": "xhigh"
+          }
+        },
+        {
+          "api": "openai-responses",
+          "contextWindow": 1050000,
+          "cost": {
+            "cacheRead": 0.1,
+            "cacheWrite": 2.5,
+            "input": 2,
+            "output": 10,
+            "tiers": [
+              {
+                "cacheRead": 0.2,
+                "cacheWrite": 5,
+                "input": 4,
+                "inputTokensAbove": 200000,
+                "output": 15
+              }
+            ]
+          },
+          "id": "openai/gpt-6-2-sol--openai",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 128000,
+          "name": "GPT-6.2 Sol",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": "medium",
+            "minimal": null,
+            "off": null,
+            "xhigh": "xhigh"
+          }
+        },
         {
           "compat": {
             "maxTokensField": "max_tokens",
             "sendSessionAffinityHeaders": true,
             "supportsDeveloperRole": false,
             "supportsLongCacheRetention": false,
-            "supportsReasoningEffort": true,
+            "supportsReasoningEffort": false,
             "supportsStore": false,
             "supportsStrictMode": true
           },
-          "contextWindow": 8192,
-          "id": "b10-internal/auto-pP8LrPn",
+          "contextWindow": 1048576,
+          "id": "moonshotai/kimi-k3-1-pro--baseten",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 1048576,
+          "name": "Kimi K3.1 Pro",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": "medium",
+            "minimal": null,
+            "off": "none",
+            "xhigh": null
+          }
+        },
+        {
+          "api": "anthropic-messages",
+          "baseUrl": "https://coding.baseten.co",
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "contextWindow": 1000000,
+          "cost": {
+            "cacheRead": 0.2,
+            "cacheWrite": 10,
+            "input": 8,
+            "output": 40
+          },
+          "id": "anthropic/claude-fable-5-2--anthropic",
           "input": [
             "text",
             "image"
           ],
           "maxTokens": 128000,
-          "name": "Auto (Fred learned router)",
+          "name": "Claude Fable 5.2",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": "medium",
+            "minimal": null,
+            "off": null,
+            "xhigh": "xhigh"
+          }
+        },
+        {
+          "api": "anthropic-messages",
+          "baseUrl": "https://coding.baseten.co",
+          "compat": {
+            "forceAdaptiveThinking": true,
+            "sendSessionAffinityHeaders": true
+          },
+          "contextWindow": 1000000,
+          "id": "baseten-router-dev-ptt-only",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 128000,
+          "name": "Baseten Router Dev (PTT only)",
           "reasoning": true,
           "thinkingLevelMap": {
             "high": "high",
@@ -338,8 +467,100 @@
             "supportsStore": false,
             "supportsStrictMode": true
           },
-          "contextWindow": 8192,
-          "id": "b10-internal/auto-XP9WlBD",
+          "contextWindow": 1048576,
+          "id": "deepseek-ai/deepseek-v4-flash-0731--baseten",
+          "input": [
+            "text"
+          ],
+          "maxTokens": 384000,
+          "name": "DeepSeek V4 Flash 0731",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": "medium",
+            "minimal": "minimal",
+            "off": "none",
+            "xhigh": "xhigh"
+          }
+        },
+        {
+          "api": "anthropic-messages",
+          "baseUrl": "https://coding.baseten.co",
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "contextWindow": 1000000,
+          "cost": {
+            "cacheRead": 0.1,
+            "cacheWrite": 2.5,
+            "input": 2,
+            "output": 10
+          },
+          "id": "anthropic/claude-sonnet-5-5--anthropic",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 128000,
+          "name": "Claude Sonnet 5.5",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": "medium",
+            "minimal": null,
+            "off": null,
+            "xhigh": "xhigh"
+          }
+        },
+        {
+          "api": "openai-responses",
+          "contextWindow": 1050000,
+          "cost": {
+            "cacheRead": 0.05,
+            "cacheWrite": 1.25,
+            "input": 1,
+            "output": 5,
+            "tiers": [
+              {
+                "cacheRead": 0.1,
+                "cacheWrite": 2.5,
+                "input": 2,
+                "inputTokensAbove": 200000,
+                "output": 7.5
+              }
+            ]
+          },
+          "id": "openai/gpt-6-1-terra--openai",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 128000,
+          "name": "GPT-6.1 Terra",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": "medium",
+            "minimal": null,
+            "off": "none",
+            "xhigh": "xhigh"
+          }
+        },
+        {
+          "api": "anthropic-messages",
+          "baseUrl": "https://coding.baseten.co",
+          "compat": {
+            "forceAdaptiveThinking": true,
+            "sendSessionAffinityHeaders": true
+          },
+          "contextWindow": 1000000,
+          "id": "auto-baseten-internal-dogfooding",
           "input": [
             "text",
             "image"
@@ -368,7 +589,7 @@
             "supportsStrictMode": true
           },
           "contextWindow": 1048576,
-          "id": "b10-internal/baseten-GLM-5.3-Flash",
+          "id": "zai-org/glm-5-3-flash--baseten",
           "input": [
             "text",
             "image"
@@ -397,7 +618,7 @@
             "supportsStrictMode": true
           },
           "contextWindow": 1048576,
-          "id": "b10-internal/baseten-GLM-5.3-Fast",
+          "id": "zai-org/glm-5-3-fast--baseten",
           "input": [
             "text",
             "image"
@@ -433,7 +654,7 @@
               }
             ]
           },
-          "id": "b10-internal/openai-gpt-6.1-sol",
+          "id": "openai/gpt-6-1-sol--openai",
           "input": [
             "text",
             "image"
@@ -454,6 +675,9 @@
         {
           "api": "anthropic-messages",
           "baseUrl": "https://coding.baseten.co",
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
           "contextWindow": 1000000,
           "cost": {
             "cacheRead": 0.25,
@@ -461,7 +685,7 @@
             "input": 10,
             "output": 50
           },
-          "id": "b10-internal/anthropic-claude-fable-5-1",
+          "id": "anthropic/claude-fable-5-1--anthropic",
           "input": [
             "text",
             "image"
@@ -477,14 +701,14 @@
             "minimal": null,
             "off": null,
             "xhigh": "xhigh"
-          },
-          "compat": {
-            "forceAdaptiveThinking": true
           }
         },
         {
           "api": "anthropic-messages",
           "baseUrl": "https://coding.baseten.co",
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
           "contextWindow": 1000000,
           "cost": {
             "cacheRead": 0.2,
@@ -492,7 +716,7 @@
             "input": 4,
             "output": 20
           },
-          "id": "b10-internal/anthropic-claude-opus-5-5",
+          "id": "anthropic/claude-opus-5-5--anthropic",
           "input": [
             "text",
             "image"
@@ -508,9 +732,6 @@
             "minimal": null,
             "off": null,
             "xhigh": "xhigh"
-          },
-          "compat": {
-            "forceAdaptiveThinking": true
           }
         },
         {
@@ -531,7 +752,7 @@
               }
             ]
           },
-          "id": "b10-internal/openai-gpt-6-luna",
+          "id": "openai/gpt-6-luna--openai",
           "input": [
             "text",
             "image"
@@ -567,7 +788,7 @@
               }
             ]
           },
-          "id": "b10-internal/openai-gpt-6-sol",
+          "id": "openai/gpt-6-sol--openai",
           "input": [
             "text",
             "image"
@@ -603,7 +824,7 @@
               }
             ]
           },
-          "id": "b10-internal/openai-gpt-6-astra",
+          "id": "openai/gpt-6-astra--openai",
           "input": [
             "text",
             "image"
@@ -632,7 +853,7 @@
             "supportsStrictMode": true
           },
           "contextWindow": 1048576,
-          "id": "b10-internal/baseten-Kimi-K3",
+          "id": "moonshotai/kimi-k3--baseten",
           "input": [
             "text",
             "image"
@@ -661,7 +882,7 @@
             "supportsStrictMode": true
           },
           "contextWindow": 1048576,
-          "id": "b10-internal/baseten-GLM-5.3",
+          "id": "zai-org/glm-5-3--baseten",
           "input": [
             "text",
             "image"
@@ -690,7 +911,7 @@
             "supportsStrictMode": true
           },
           "contextWindow": 1048576,
-          "id": "b10-internal/baseten-DeepSeek-V4.1-Flash",
+          "id": "deepseek-ai/deepseek-v4-1-flash--baseten",
           "input": [
             "text",
             "image"

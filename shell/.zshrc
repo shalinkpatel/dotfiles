@@ -36,3 +36,6 @@ herdr() {
   esac
 }
 
+
+# Added by nteract – puts nteract CLI on PATH
+export PATH="/Users/shalin.patel/.local/bin:$PATH"
