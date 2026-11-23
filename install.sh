@@ -692,7 +692,9 @@ install_erlang() {
     tar -xzf "$tmp/otp.tar.gz" -C "$tmp"
     rm -rf "$HOME/.local/opt/erlang"
     mv "$tmp/${version}" "$HOME/.local/opt/erlang"
-    for b in erl erlc escript erl_call; do
+    # hex.pm builds ship no bin/ until Install rewrites ROOTDIR.
+    "$HOME/.local/opt/erlang/Install" -minimal "$HOME/.local/opt/erlang" >/dev/null || { info "WARN: erlang Install failed"; rm -rf "$tmp"; return 1; }
+    for b in erl erlc escript erl_call epmd; do
       ln -sfn "$HOME/.local/opt/erlang/bin/$b" "$HOME/.local/bin/$b"
     done
   else

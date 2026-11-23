@@ -17,15 +17,40 @@ command -v ww >/dev/null && command -v erl >/dev/null || die "ww/erl not install
 
 ip="$(tailscale ip -4 2>/dev/null | head -1)"
 [ -n "$ip" ] || die "not on a tailnet (tailscale ip -4 failed)"
-name="ww-$(hostname -s)@$ip"
+name="ww-${WW_HOST:-$(hostname -s)}@$ip"
 log="$HOME/.local/state/waterworks/ww.log"
 mkdir -p "$(dirname "$log")"
+
+# macOS: run under launchd (foreground ww, KeepAlive) instead of nohup. The agent
+# re-invokes this script with WW_FOREGROUND=1.
+if [ "$(uname -s)" = Darwin ] && [ -z "${WW_FOREGROUND:-}" ]; then
+  plist="$HOME/Library/LaunchAgents/dev.shalin.ww.plist"
+  mkdir -p "$(dirname "$log")"
+  cat >"$plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>dev.shalin.ww</string>
+<key>ProgramArguments</key><array><string>$HOME/.local/bin/ww-up</string></array>
+<key>EnvironmentVariables</key><dict>
+<key>PATH</key><string>$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+<key>WW_HOST</key><string>${WW_HOST:-mbp}</string><key>WW_FOREGROUND</key><string>1</string>
+</dict>
+<key>RunAtLoad</key><true/><key>KeepAlive</key><true/>
+<key>StandardOutPath</key><string>$log</string>
+<key>StandardErrorPath</key><string>$log</string>
+</dict></plist>
+PLIST
+  launchctl bootout "gui/$(id -u)/dev.shalin.ww" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$plist"
+  echo "ww-up: launchd agent dev.shalin.ww loaded"; exit 0
+fi
 
 export ERL_EPMD_ADDRESS="$ip,127.0.0.1" # loopback keeps local `epmd -names` working
 epmd -daemon -address "$ip,127.0.0.1"
 
 # Already running? epmd (bound to our tailnet IP) lists registered node names.
-if epmd -names 2>/dev/null | grep -q "name ww-$(hostname -s) "; then
+if [ -z "${WW_FOREGROUND:-}" ] && epmd -names 2>/dev/null | grep -q "name ww-${WW_HOST:-$(hostname -s)} "; then
   echo "ww-up: $name already running"; exit 0
 fi
 
@@ -34,13 +59,17 @@ export ERL_AFLAGS="-kernel inet_dist_use_interface {$a,$b,$c,$d} inet_dist_liste
 
 # Find a ww node (registered as ww-*) on another online tailnet peer.
 join=""
-for peer in $(tailscale status --json | jq -r '.Peer[]? | select(.Online) | .TailscaleIPs[0]'); do
+# Only probe our own devices (same tailnet user): the tailnet has hundreds of peers.
+for peer in $(tailscale status --json | jq -r '.Self.UserID as $u | .Peer[]? | select(.Online and .UserID == $u) | .TailscaleIPs[0]'); do
   n="$(timeout 4 erl -noshell -eval '
     case erl_epmd:names(hd(init:get_plain_arguments())) of
       {ok, L} -> [io:format("~s~n", [N]) || {N, _} <- L, lists:prefix("ww-", N)];
-      _ -> ok end, halt().' -extra "$peer" 2>/dev/null | head -1 || true)"
+      _ -> ok end, halt().' -extra "$peer" 2>/dev/null | grep -m1 -E "^ww-[A-Za-z0-9_-]+$" || true)"
   [ -n "$n" ] && { join="$n@$peer"; break; }
 done
 
 echo "ww-up: starting $name${join:+ joining $join}"
-WW_JOIN="$join" nohup ww serve --name "$name" >>"$log" 2>&1 &
+export WW_JOIN="$join"
+# WW_FOREGROUND=1 (launchd) keeps ww in the foreground so the supervisor restarts it.
+[ -n "${WW_FOREGROUND:-}" ] && exec ww serve --name "$name"
+nohup ww serve --name "$name" >>"$log" 2>&1 &
