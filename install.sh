@@ -933,6 +933,15 @@ main() {
   # footer status order to pi-perf, ponytail, caveman.
   link_path "$DOTFILES_DIR/pi/.pi/agent/extensions/footer-status-order.ts" "$HOME/.pi/agent/extensions/footer-status-order.ts"
 
+  # Waterworks adapter: lives in the ww checkout (project-local there), so link it
+  # globally to let any pi session receive ww messages. Skipped until ww is cloned.
+  ww_ext="$WORKSPACE_ROOT/repos/ww/.pi/extensions/waterworks.js"
+  if [ -f "$ww_ext" ]; then
+    link_path "$ww_ext" "$HOME/.pi/agent/extensions/waterworks.js"
+  else
+    info "Skipping Waterworks adapter link (no ww checkout at $WORKSPACE_ROOT/repos/ww)"
+  fi
+
   # User-level agent instructions: one canonical AGENTS.md, symlinked into
   # every coding harness that reads it. Claude Code reads ~/.claude/AGENTS.md
   # (its CLAUDE.md imports it via "@AGENTS.md"); pi reads ~/.pi/agent/AGENTS.md.
