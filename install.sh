@@ -747,6 +747,29 @@ install_elixir() {
   rm -rf "$tmp"
 }
 
+install_ww() {
+  # Waterworks (ww): built from source as an escript (needs erlang + elixir).
+  # Linux pods only; macOS runs it from a local checkout via launchd.
+  if [ "$OS" != "Linux" ]; then
+    info "Skipping ww build on $OS"
+    return 0
+  fi
+  if ! command -v mix >/dev/null 2>&1; then
+    info "WARN: ww needs elixir (install_elixir first)"
+    return 1
+  fi
+  local src="$WORKSPACE_ROOT/repos/ww"
+  if [ -d "$src/.git" ]; then
+    git -C "$src" pull -q --ff-only || info "WARN: ww pull failed; building existing checkout"
+  else
+    mkdir -p "$WORKSPACE_ROOT/repos"
+    git clone -q https://github.com/shalinkpatel/waterworks.git "$src" || { info "WARN: ww clone failed"; return 1; }
+  fi
+  (cd "$src" && mix local.hex --force >/dev/null && mix local.rebar --force >/dev/null \
+    && mix deps.get >/dev/null && mix escript.build >/dev/null) || { info "WARN: ww build failed"; return 1; }
+  ln -sfn "$src/ww" "$HOME/.local/bin/ww"
+}
+
 install_java() {
   # Adoptium Temurin JDK (portable tarball). Needed by Clojure. macOS: brew install openjdk.
   if command -v java >/dev/null 2>&1; then
@@ -939,6 +962,9 @@ main() {
   link_path "$DOTFILES_DIR/AGENTS.md" "$HOME/.claude/AGENTS.md"
   link_path "$DOTFILES_DIR/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
 
+  # ww-up: tailnet-bound Waterworks launcher (see the script header).
+  link_path "$DOTFILES_DIR/ww/.local/bin/ww-up" "$HOME/.local/bin/ww-up"
+
   # Toolchain
   install_rust || info "WARN: rust install failed"
   install_uv || info "WARN: uv install failed"
@@ -969,6 +995,7 @@ main() {
   # before clojure, elixir before elixir-ls.
   install_erlang || info "WARN: erlang install failed"
   install_elixir || info "WARN: elixir install failed"
+  install_ww || info "WARN: ww install failed"
   install_java || info "WARN: java install failed"
   install_clojure || info "WARN: clojure install failed"
   install_babashka || info "WARN: babashka install failed"
@@ -985,6 +1012,11 @@ main() {
   install_herdr || info "WARN: herdr install failed"
   install_claude || info "WARN: claude install failed"
   install_baseten || info "WARN: baseten CLI install failed"
+
+  # Start/join the ww cluster if the manual secrets are already in place.
+  if [ "$OS" = "Linux" ]; then
+    ww-up || info "NOTE: ww not started; add ~/.erlang.cookie + WW_ADMIN_TOKEN, then run ww-up"
+  fi
 
   info ""
   info "Install complete."

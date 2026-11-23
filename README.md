@@ -196,3 +196,13 @@ intertubin pods create --dotfiles shalinkpatel/dotfiles
 # then drop your real secrets in:
 cp shell/.profile.secret.example ~/.profile.secret && $EDITOR ~/.profile.secret
 ```
+
+## Waterworks cluster (ww)
+
+`install.sh` builds `ww` (Linux) and links `ww-up`, which starts `ww serve` as
+`ww-<host>@<tailscale-ip>` and joins any `ww-*` node found on another online
+tailnet peer. epmd and Erlang distribution bind only to the tailscale address
+(ports 9100-9109), so nodes only connect over the same tailnet. Secrets are
+manual on every machine: the shared `~/.erlang.cookie` (0400) and a unique
+`WW_ADMIN_TOKEN` in `~/.profile.secret`. Then run `ww-up` (re-run after pod
+restarts; start nodes one at a time).

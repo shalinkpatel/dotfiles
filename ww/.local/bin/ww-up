@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Start (idempotently) a Waterworks node bound to this machine's tailnet IP and
+# join any ww node already running on the same tailnet. Erlang distribution and
+# epmd listen ONLY on the tailscale address, so nodes can only reach each other
+# over the tailnet. Secrets are never created here: put the shared cookie in
+# ~/.erlang.cookie (0400) and a per-node WW_ADMIN_TOKEN in ~/.profile.secret.
+# shortcut: joins the first peer found, so start nodes one at a time (two fresh
+# nodes started at once form separate clusters); upgrade to a seed list if needed.
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+die() { echo "ww-up: $*" >&2; exit 1; }
+
+[ -f "$HOME/.profile.secret" ] && { set -a; . "$HOME/.profile.secret"; set +a; }
+[ -f "$HOME/.erlang.cookie" ] || die "missing ~/.erlang.cookie (copy the shared cookie, mode 0400)"
+[ "${#WW_ADMIN_TOKEN}" -ge 16 ] || die "WW_ADMIN_TOKEN (>=16 chars) not set in ~/.profile.secret"
+command -v ww >/dev/null && command -v erl >/dev/null || die "ww/erl not installed (run dotfiles install.sh)"
+
+ip="$(tailscale ip -4 2>/dev/null | head -1)"
+[ -n "$ip" ] || die "not on a tailnet (tailscale ip -4 failed)"
+name="ww-$(hostname -s)@$ip"
+log="$HOME/.local/state/waterworks/ww.log"
+mkdir -p "$(dirname "$log")"
+
+export ERL_EPMD_ADDRESS="$ip,127.0.0.1" # loopback keeps local `epmd -names` working
+epmd -daemon -address "$ip,127.0.0.1"
+
+# Already running? epmd (bound to our tailnet IP) lists registered node names.
+if epmd -names 2>/dev/null | grep -q "name ww-$(hostname -s) "; then
+  echo "ww-up: $name already running"; exit 0
+fi
+
+IFS=. read -r a b c d <<<"$ip"
+export ERL_AFLAGS="-kernel inet_dist_use_interface {$a,$b,$c,$d} inet_dist_listen_min 9100 inet_dist_listen_max 9109"
+
+# Find a ww node (registered as ww-*) on another online tailnet peer.
+join=""
+for peer in $(tailscale status --json | jq -r '.Peer[]? | select(.Online) | .TailscaleIPs[0]'); do
+  n="$(timeout 4 erl -noshell -eval '
+    case erl_epmd:names(hd(init:get_plain_arguments())) of
+      {ok, L} -> [io:format("~s~n", [N]) || {N, _} <- L, lists:prefix("ww-", N)];
+      _ -> ok end, halt().' -extra "$peer" 2>/dev/null | head -1 || true)"
+  [ -n "$n" ] && { join="$n@$peer"; break; }
+done
+
+echo "ww-up: starting $name${join:+ joining $join}"
+WW_JOIN="$join" nohup ww serve --name "$name" >>"$log" 2>&1 &
