@@ -14,9 +14,11 @@
     "baseten-harness/auto-baseten-internal-dogfooding",
     "baseten-harness/zai-org/glm-5-3-flash--baseten",
     "baseten-harness/zai-org/glm-5-3-fast--baseten",
-    "baseten-harness/moonshotai/kimi-k3--baseten"
+    "baseten-harness/moonshotai/kimi-k3--baseten",
+    "baseten-harness/google/gemini-4-carbon--vertex",
+    "baseten-harness/google/gemini-4-neon--vertex"
   ],
-  "lastChangelogVersion": "1.5.2",
+  "lastChangelogVersion": "1.6.0",
   "packages": [
     "npm:@dietrichgebert/ponytail",
     "git:github.com/shalinkpatel/pi-perf",

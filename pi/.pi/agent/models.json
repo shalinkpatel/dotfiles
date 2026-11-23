@@ -294,11 +294,81 @@
       "api": "openai-completions",
       "apiKey": "!'/Users/shalin.patel/.local/bin/baseten' grid token --harness pi --profile 'prod-internal-coding'",
       "authHeader": true,
-      "baseUrl": "https://coding.baseten.co/v1",
+      "baseUrl": "https://grid.baseten.co/v1",
       "headers": {
         "X-Baseten-Grid-Client": "pi"
       },
       "models": [
+        {
+          "api": "google-generative-ai",
+          "baseUrl": "https://grid.baseten.co/v1beta",
+          "contextWindow": 1048576,
+          "id": "google/gemini-4-carbon--vertex",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 65536,
+          "name": "Gemini 4 Carbon",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": null,
+            "medium": "medium",
+            "minimal": null,
+            "off": null,
+            "xhigh": null
+          }
+        },
+        {
+          "api": "google-generative-ai",
+          "baseUrl": "https://grid.baseten.co/v1beta",
+          "contextWindow": 1048576,
+          "id": "google/gemini-4-neon--vertex",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 65536,
+          "name": "Gemini 4 Neon",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": null,
+            "medium": "medium",
+            "minimal": null,
+            "off": null,
+            "xhigh": "xhigh"
+          }
+        },
+        {
+          "api": "anthropic-messages",
+          "baseUrl": "https://grid.baseten.co",
+          "compat": {
+            "forceAdaptiveThinking": true,
+            "sendSessionAffinityHeaders": true
+          },
+          "contextWindow": 1000000,
+          "id": "auto-cost-baseten-internal",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 128000,
+          "name": "Intelligent: Cost Efficient",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "high": "high",
+            "low": "low",
+            "max": "max",
+            "medium": null,
+            "minimal": null,
+            "off": null,
+            "xhigh": null
+          }
+        },
         {
           "api": "openai-responses",
           "contextWindow": 1050000,
@@ -377,7 +447,7 @@
             "sendSessionAffinityHeaders": true,
             "supportsDeveloperRole": false,
             "supportsLongCacheRetention": false,
-            "supportsReasoningEffort": false,
+            "supportsReasoningEffort": true,
             "supportsStore": false,
             "supportsStrictMode": true
           },
@@ -402,9 +472,10 @@
         },
         {
           "api": "anthropic-messages",
-          "baseUrl": "https://coding.baseten.co",
+          "baseUrl": "https://grid.baseten.co",
           "compat": {
-            "forceAdaptiveThinking": true
+            "forceAdaptiveThinking": true,
+            "sendSessionAffinityHeaders": true
           },
           "contextWindow": 1000000,
           "cost": {
@@ -433,7 +504,7 @@
         },
         {
           "api": "anthropic-messages",
-          "baseUrl": "https://coding.baseten.co",
+          "baseUrl": "https://grid.baseten.co",
           "compat": {
             "forceAdaptiveThinking": true,
             "sendSessionAffinityHeaders": true
@@ -445,7 +516,7 @@
             "image"
           ],
           "maxTokens": 128000,
-          "name": "Baseten Router Dev (PTT only)",
+          "name": "Intelligent: Dev (PTT only)",
           "reasoning": true,
           "thinkingLevelMap": {
             "high": "high",
@@ -487,9 +558,10 @@
         },
         {
           "api": "anthropic-messages",
-          "baseUrl": "https://coding.baseten.co",
+          "baseUrl": "https://grid.baseten.co",
           "compat": {
-            "forceAdaptiveThinking": true
+            "forceAdaptiveThinking": true,
+            "sendSessionAffinityHeaders": true
           },
           "contextWindow": 1000000,
           "cost": {
@@ -554,7 +626,7 @@
         },
         {
           "api": "anthropic-messages",
-          "baseUrl": "https://coding.baseten.co",
+          "baseUrl": "https://grid.baseten.co",
           "compat": {
             "forceAdaptiveThinking": true,
             "sendSessionAffinityHeaders": true
@@ -566,7 +638,7 @@
             "image"
           ],
           "maxTokens": 128000,
-          "name": "Auto (Baseten Internal Dogfooding)",
+          "name": "Intelligent: Balanced",
           "reasoning": true,
           "thinkingLevelMap": {
             "high": "high",
@@ -674,9 +746,10 @@
         },
         {
           "api": "anthropic-messages",
-          "baseUrl": "https://coding.baseten.co",
+          "baseUrl": "https://grid.baseten.co",
           "compat": {
-            "forceAdaptiveThinking": true
+            "forceAdaptiveThinking": true,
+            "sendSessionAffinityHeaders": true
           },
           "contextWindow": 1000000,
           "cost": {
@@ -705,9 +778,10 @@
         },
         {
           "api": "anthropic-messages",
-          "baseUrl": "https://coding.baseten.co",
+          "baseUrl": "https://grid.baseten.co",
           "compat": {
-            "forceAdaptiveThinking": true
+            "forceAdaptiveThinking": true,
+            "sendSessionAffinityHeaders": true
           },
           "contextWindow": 1000000,
           "cost": {
